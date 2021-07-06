@@ -2,6 +2,7 @@ import json
 import os
 import sys
 
+import keyring
 import pandas
 import pytest
 import urllib3
@@ -17,11 +18,30 @@ sys.path.append('.')
 from models.exchange.binance import AuthAPI, PublicAPI
 
 
+def get_api_settings(filename):
+    with open(filename) as config_file:
+        config = json.load(config_file)
+    api_key = ''
+    api_secret = ''
+    api_url = ''
+    if 'api_key' in config and 'api_pass' in config and 'api_url' in config:
+        api_key = config['api_key']
+        api_secret = keyring.get_password("pycryptobot", api_key)
+        api_url = config['api_url']
+    elif 'api_key' in config['binance'] and 'api_url' in config['binance']:
+        api_key = config['binance']['api_key']
+        api_secret = keyring.get_password("pycryptobot", api_key)
+        api_url = config['binance']['api_url']
+    return {
+        api_key, api_secret, api_url
+    }
+
+
 def test_instantiate_authapi_without_error():
     api_key = "0000000000000000000000000000000000000000000000000000000000000000"
     api_secret = "0000000000000000000000000000000000000000000000000000000000000000"
     exchange = AuthAPI(api_key, api_secret)
-    assert type(exchange) is AuthAPI
+    assert isinstance(exchange, AuthAPI)
 
 
 def test_instantiate_authapi_with_api_key_error():
@@ -54,24 +74,14 @@ def test_instantiate_authapi_with_api_url_error():
 
 def test_instantiate_publicapi_without_error():
     exchange = PublicAPI()
-    assert type(exchange) is PublicAPI
+    assert isinstance(exchange, PublicAPI)
 
 
 def test_config_json_exists_and_valid():
     file = _get_config_file()
-    assert os.path.exists(file) == True
-    with open(file) as config_file:
-        config = json.load(config_file)
-        if 'api_key' in config and 'api_secret' in config and 'api_pass' in config and 'api_url' in config:
-            api_key = config['api_key']
-            api_secret = config['api_secret']
-            api_url = config['api_url']
-            AuthAPI(api_key, api_secret, api_url)
-        elif 'api_key' in config['binance'] and 'api_secret' in config['binance'] and 'api_url' in config['binance']:
-            api_key = config['binance']['api_key']
-            api_secret = config['binance']['api_secret']
-            api_url = config['binance']['api_url']
-            AuthAPI(api_key, api_secret, api_url)
+    assert os.path.exists(file) is True
+    (api_key, api_secret, api_url) = get_api_settings(file)
+    AuthAPI(api_key, api_secret, api_url)
 
 
 def test_get_account(mocker):
@@ -92,123 +102,59 @@ def test_get_account(mocker):
         'permissions': ['SPOT']
     }
 
-    with open(_get_config_file()) as config_file:
-        config = json.load(config_file)
-
-        api_key = ''
-        api_secret = ''
-        api_url = ''
-        if 'api_key' in config and 'api_secret' in config and 'api_pass' in config and 'api_url' in config:
-            api_key = config['api_key']
-            api_secret = config['api_secret']
-            api_url = config['api_url']
-            AuthAPI(api_key, api_secret, api_url)
-        elif 'api_key' in config['binance'] and 'api_secret' in config['binance'] and 'api_url' in config['binance']:
-            api_key = config['binance']['api_key']
-            api_secret = config['binance']['api_secret']
-            api_url = config['binance']['api_url']
-            AuthAPI(api_key, api_secret, api_url)
-
+    (api_key, api_secret, api_url) = get_api_settings(BINANCE_CONFIG_JSON)
     exchange = AuthAPI(api_key, api_secret, api_url)
-    assert type(exchange) is AuthAPI
+    assert isinstance(exchange, AuthAPI)
 
     mocker.patch("models.exchange.binance.Client.get_account", return_value=client_response)
     df = exchange.getAccount()
-    assert type(df) is pandas.core.frame.DataFrame
+    assert isinstance(df, pandas.core.frame.DataFrame)
 
     actual = df.columns.to_list()
     expected = ['currency', 'balance', 'hold', 'available']
     assert len(actual) == len(expected)
-    assert all([a == b for a, b in zip(actual, expected)])
+    assert all(a == b for a, b in zip(actual, expected))
 
 
 def test_get_fees_with_market(mocker):
     client_response = {'success': True, 'tradeFee': [{'maker': 0.001, 'symbol': 'CHZUSDT', 'taker': 0.001}]}
-    with open(_get_config_file()) as config_file:
-        config = json.load(config_file)
-
-        api_key = ''
-        api_secret = ''
-        api_url = ''
-        if 'api_key' in config and 'api_secret' in config and 'api_pass' in config and 'api_url' in config:
-            api_key = config['api_key']
-            api_secret = config['api_secret']
-            api_url = config['api_url']
-            AuthAPI(api_key, api_secret, api_url)
-        elif 'api_key' in config['binance'] and 'api_secret' in config['binance'] and 'api_url' in config['binance']:
-            api_key = config['binance']['api_key']
-            api_secret = config['binance']['api_secret']
-            api_url = config['binance']['api_url']
-            AuthAPI(api_key, api_secret, api_url)
-
+    (api_key, api_secret, api_url) = get_api_settings(BINANCE_CONFIG_JSON)
     exchange = AuthAPI(api_key, api_secret, api_url)
-    assert type(exchange) is AuthAPI
+    assert isinstance(exchange, AuthAPI)
 
     mocker.patch("models.exchange.binance.Client.get_trade_fee", return_value=client_response)
     df = exchange.getFees(MOCK_MARKET)
-    assert type(df) is pandas.core.frame.DataFrame
+    assert isinstance(df, pandas.core.frame.DataFrame)
 
     assert len(df) == 1
 
     actual = df.columns.to_list()
     expected = ['maker_fee_rate', 'taker_fee_rate', 'usd_volume', 'market']
     assert len(actual) == len(expected)
-    assert all([a == b for a, b in zip(actual, expected)])
+    assert all(a == b for a, b in zip(actual, expected))
 
 
 def test_get_taker_fee_with_market(mocker):
     client_response = {'success': True, 'tradeFee': [{'maker': 0.001, 'symbol': 'CHZUSDT', 'taker': 0.001}]}
-    with open(_get_config_file()) as config_file:
-        config = json.load(config_file)
-
-        api_key = ''
-        api_secret = ''
-        api_url = ''
-        if 'api_key' in config and 'api_secret' in config and 'api_pass' in config and 'api_url' in config:
-            api_key = config['api_key']
-            api_secret = config['api_secret']
-            api_url = config['api_url']
-            AuthAPI(api_key, api_secret, api_url)
-        elif 'api_key' in config['binance'] and 'api_secret' in config['binance'] and 'api_url' in config['binance']:
-            api_key = config['binance']['api_key']
-            api_secret = config['binance']['api_secret']
-            api_url = config['binance']['api_url']
-            AuthAPI(api_key, api_secret, api_url)
-
+    (api_key, api_secret, api_url) = get_api_settings(BINANCE_CONFIG_JSON)
     exchange = AuthAPI(api_key, api_secret, api_url)
-    assert type(exchange) is AuthAPI
+    assert isinstance(exchange, AuthAPI)
 
     mocker.patch("models.exchange.binance.Client.get_trade_fee", return_value=client_response)
     fee = exchange.getTakerFee(MOCK_MARKET)
-    assert type(fee) is float
+    assert isinstance(fee, float)
     assert fee == 0.001
 
 
 def test_get_maker_fee_with_market(mocker):
     client_response = {'success': True, 'tradeFee': [{'maker': 0.001, 'symbol': 'CHZUSDT', 'taker': 0.001}]}
-    with open(_get_config_file()) as config_file:
-        config = json.load(config_file)
-
-        api_key = ''
-        api_secret = ''
-        api_url = ''
-        if 'api_key' in config and 'api_secret' in config and 'api_pass' in config and 'api_url' in config:
-            api_key = config['api_key']
-            api_secret = config['api_secret']
-            api_url = config['api_url']
-            AuthAPI(api_key, api_secret, api_url)
-        elif 'api_key' in config['binance'] and 'api_secret' in config['binance'] and 'api_url' in config['binance']:
-            api_key = config['binance']['api_key']
-            api_secret = config['binance']['api_secret']
-            api_url = config['binance']['api_url']
-            AuthAPI(api_key, api_secret, api_url)
-
+    (api_key, api_secret, api_url) = get_api_settings(BINANCE_CONFIG_JSON)
     exchange = AuthAPI(api_key, api_secret, api_url)
-    assert type(exchange) is AuthAPI
+    assert isinstance(exchange, AuthAPI)
 
     mocker.patch("models.exchange.binance.Client.get_trade_fee", return_value=client_response)
     fee = exchange.getMakerFee(MOCK_MARKET)
-    assert type(fee) is float
+    assert isinstance(fee, float)
     assert fee == 0.001
 
 
@@ -237,25 +183,9 @@ def test_get_orders(mocker):
         }
     ]
 
-    with open(_get_config_file()) as config_file:
-        config = json.load(config_file)
-
-        api_key = ''
-        api_secret = ''
-        api_url = ''
-        if 'api_key' in config and 'api_secret' in config and 'api_pass' in config and 'api_url' in config:
-            api_key = config['api_key']
-            api_secret = config['api_secret']
-            api_url = config['api_url']
-            AuthAPI(api_key, api_secret, api_url)
-        elif 'api_key' in config['binance'] and 'api_secret' in config['binance'] and 'api_url' in config['binance']:
-            api_key = config['binance']['api_key']
-            api_secret = config['binance']['api_secret']
-            api_url = config['binance']['api_url']
-            AuthAPI(api_key, api_secret, api_url)
-
+    (api_key, api_secret, api_url) = get_api_settings(BINANCE_CONFIG_JSON)
     exchange = AuthAPI(api_key, api_secret, api_url)
-    assert type(exchange) is AuthAPI
+    assert isinstance(exchange, AuthAPI)
     mocker.patch("models.exchange.binance.Client.get_all_orders", return_value=client_response)
     df = exchange.getOrders(MOCK_MARKET)
 
@@ -273,5 +203,4 @@ def _get_config_file():
     filename = BINANCE_CONFIG_JSON
     path_to_current_file = os.path.realpath(__file__)
     current_directory = os.path.split(path_to_current_file)[0]
-    path_to_file = os.path.join(current_directory, filename)
-    return path_to_file
+    return os.path.join(current_directory, filename)

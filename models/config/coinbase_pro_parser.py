@@ -1,6 +1,9 @@
 import re
 
+import keyring
+
 from .default_parser import isCurrencyValid, defaultConfigParse, merge_config_and_args
+
 
 def isMarketValid(market) -> bool:
     p = re.compile(r"^[1-9A-Z]{2,5}\-[1-9A-Z]{2,5}$")
@@ -15,9 +18,11 @@ def parseMarket(market):
     return market, base_currency, quote_currency
 
 
-def parser(app, coinbase_config, args={}):
+def parser(app, coinbase_config, args=None):
     #print('CoinbasePro Configuration parse')
 
+    if args is None:
+        args = {}
     if not coinbase_config:
         raise Exception('There is an error in your config dictionary')
 
@@ -40,29 +45,31 @@ def parser(app, coinbase_config, args={}):
         except :
             raise RuntimeError('Unable to read ' + coinbase_config['api_key_file'])
 
-    if 'api_key' in coinbase_config and 'api_secret' in coinbase_config and \
-            'api_passphrase' in coinbase_config and 'api_url' in coinbase_config:
+    if 'api_key' in coinbase_config and 'api_passphrase' in coinbase_config and 'api_url' in coinbase_config:
 
         # validates the api key is syntactically correct
+        api_key = coinbase_config['api_key']
         p = re.compile(r"^[a-f0-9]{32}$")
-        if not p.match(coinbase_config['api_key']):
+        if not p.match(api_key):
             raise TypeError('Coinbase Pro API key is invalid')
 
-        app.api_key = coinbase_config['api_key']
+        app.api_key = api_key
 
         # validates the api secret is syntactically correct
+        api_secret = keyring.get_password("pycryptobot", api_key)
         p = re.compile(r"^[A-z0-9+\/]+==$")
-        if not p.match(coinbase_config['api_secret']):
+        if not p.match(api_secret):
             raise TypeError('Coinbase Pro API secret is invalid')
 
-        app.api_secret = coinbase_config['api_secret']
+        app.api_secret = api_secret
 
         # validates the api passphrase is syntactically correct
+        api_passphrase = coinbase_config['api_passphrase']
         p = re.compile(r"^[A-z0-9#$%=@!{},`~&*()<>?.:;_|^/+\[\]]{8,32}$")
-        if not p.match(coinbase_config['api_passphrase']):
+        if not p.match(api_passphrase):
             raise TypeError('Coinbase Pro API passphrase is invalid')
 
-        app.api_passphrase = coinbase_config['api_passphrase']
+        app.api_passphrase = api_passphrase
 
         valid_urls = [
             'https://api.pro.coinbase.com/',

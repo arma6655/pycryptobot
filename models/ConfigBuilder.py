@@ -1,9 +1,12 @@
 """config.json Configuration Builder"""
 
-from os.path import isfile
 from json import dump
+from os.path import isfile
 from re import compile as re_compile
 from sys import exit as sys_exit
+
+import keyring
+
 
 class ConfigBuilder():
     def __init__(self) -> None:
@@ -23,11 +26,10 @@ class ConfigBuilder():
         choice = input("Do you want to use the Coinbase Pro exchange (1=yes, 2=no:default)? ")
         if choice == '1':
             self._c = 1
-            config['coinbasepro'] = {}
-            config['coinbasepro']['api_url'] = 'https://api.pro.coinbase.com'
-
+            config['coinbasepro'] = {'api_url': 'https://api.pro.coinbase.com'}
             choice = input("Do you have API keys for the Coinbase Pro exchange (1=yes, 2=no:default)? ")
             if choice == '1':
+                api_key = None
                 while 'api_key' not in config['coinbasepro']:
                     api_key = input("What is your Coinbase Pro API Key? ")
                     p = re_compile(r"^[a-f0-9]{32,32}$")
@@ -39,6 +41,8 @@ class ConfigBuilder():
                     p = re_compile(r"^[A-z0-9+\/]+==$")
                     if p.match(api_secret):
                         config['coinbasepro']['api_secret'] = api_secret
+                        keyring.set_password("pycryptobot", api_key, api_secret)
+                config['coinbasepro'].pop('api_secret')
 
                 while 'api_passphrase' not in config['coinbasepro']:
                     api_passphrase = input("What is your Coinbase Pro API Passphrase? ")
@@ -71,22 +75,16 @@ class ConfigBuilder():
                     if int(choice) in [60, 300, 900, 3600, 21600, 86400]:
                         config['coinbasepro']['config']['granularity'] = int(choice)
 
-
             choice = input("Do you want to start live trading? (1=live, 2=test:default)? ")
-            if choice == '1':
-                config['coinbasepro']['config']['live'] = 1
-            else:
-                config['coinbasepro']['config']['live'] = 0
-
+            config['coinbasepro']['config']['live'] = 1 if choice == '1' else 0
 
         choice = input("Do you want to use the Binance exchange (1=yes, 2=no:default)? ")
         if choice == '1':
             self._b = 1
-            config['binance'] = {}
-            config['binance']['api_url'] = 'https://api.binance.com'
-
+            config['binance'] = {'api_url': 'https://api.binance.com'}
             choice = input("Do you have API keys for the Binance exchange (1=yes, 2=no:default)? ")
             if choice == '1':
+                api_key = None
                 while 'api_key' not in config['binance']:
                     api_key = input("What is your Binance API Key? ")
                     p = re_compile(r"^[A-z0-9]{64,64}$")
@@ -98,6 +96,8 @@ class ConfigBuilder():
                     p = re_compile(r"^[A-z0-9]{64,64}$")
                     if p.match(api_secret):
                         config['binance']['api_secret'] = api_secret
+                        keyring.set_password("pycryptobot", api_key, api_secret)
+                config['binance'].pop('api_secret')
             else:
                 config['binance']['api_key'] = '<fill in>'
                 config['binance']['api_secret'] = '<fill in>'
@@ -124,28 +124,27 @@ class ConfigBuilder():
                         config['binance']['config']['granularity'] = choice
 
             choice = input("Do you want to start live trading? (1=live, 2=test:default)? ")
-            if choice == '1':
-                config['binance']['config']['live'] = 1
-            else:
-                config['binance']['config']['live'] = 0
-
+            config['binance']['config']['live'] = 1 if choice == '1' else 0
         if self._b == 1 or self._c == 1:
             choice = input("Do you have a Telegram Token and Client ID (1=yes, 2=no:default)? ")
             if choice == '1':
                 self._t = 1
                 config['telegram'] = {}
 
-                while 'token' not in config['telegram']:
-                    token = input("What is your Telegram token? ")
-                    p = re_compile(r"^\d{1,10}:[A-z0-9-_]{35,35}$")
-                    if p.match(token):
-                        config['telegram']['token'] = token
-
+                client_id = None
                 while 'client_id' not in config['telegram']:
                     client_id = input("What is your Telegram client ID? ")
                     p = re_compile(r"^-*\d{7,10}$")
                     if p.match(client_id):
                         config['telegram']['client_id'] = client_id
+
+                while 'token' not in config['telegram']:
+                    token = input("What is your Telegram token? ")
+                    p = re_compile(r"^\d{1,10}:[A-z0-9-_]{35,35}$")
+                    if p.match(token):
+                        config['telegram']['token'] = token
+                        keyring.set_password("pycryptobot", client_id, token)
+                config['telegram'].pop('token')
 
             choice = input("Do you want to ever sell at a loss even to minimise losses (1:yes, 2=no:default)? ")
             if choice == '1':
@@ -211,8 +210,8 @@ class ConfigBuilder():
                     config['binance']['config']['autorestart'] = 1
 
             try:
-                with open('./config.json', 'w') as fout :
-                    dump(config, fout, indent=4)
+                with open('./config.json', 'w') as file_out:
+                    dump(config, file_out, indent=4)
                 print("config.json saved!")
             except Exception as err:
                 print(err)
