@@ -1,5 +1,6 @@
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 
 from models.helper.LogHelper import Logger
 from models.PyCryptoBot import PyCryptoBot

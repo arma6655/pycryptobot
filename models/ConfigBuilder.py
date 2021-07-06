@@ -1,5 +1,4 @@
 """config.json Configuration Builder"""
-
 from json import dump
 from os.path import isfile
 from re import compile as re_compile

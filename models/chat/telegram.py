@@ -1,6 +1,9 @@
 from re import compile as re_compile
 
-from requests import ConnectionError, Timeout, exceptions, get
+from requests import ConnectionError
+from requests import exceptions
+from requests import get
+from requests import Timeout
 
 
 class Telegram:

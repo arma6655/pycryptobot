@@ -5,7 +5,8 @@ import os
 import random
 import re
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 from typing import Union
 
 import keyring
@@ -14,9 +15,12 @@ import urllib3
 from urllib3.exceptions import ReadTimeoutError
 
 from models.chat import Telegram
-from models.config import (binanceConfigParser, binanceParseMarket,
-                           coinbaseProConfigParser, coinbaseProParseMarket,
-                           dummyConfigParser, loggerConfigParser)
+from models.config import binanceConfigParser
+from models.config import binanceParseMarket
+from models.config import coinbaseProConfigParser
+from models.config import coinbaseProParseMarket
+from models.config import dummyConfigParser
+from models.config import loggerConfigParser
 from models.ConfigBuilder import ConfigBuilder
 from models.exchange.binance import AuthAPI as BAuthAPI
 from models.exchange.binance import PublicAPI as BPublicAPI

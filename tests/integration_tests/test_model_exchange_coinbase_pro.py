@@ -8,7 +8,8 @@ import keyring
 import pandas
 import pytest
 
-from models.exchange.coinbase_pro import AuthAPI, PublicAPI
+from models.exchange.coinbase_pro import AuthAPI
+from models.exchange.coinbase_pro import PublicAPI
 from models.helper.LogHelper import Logger
 
 sys.path.append(".")

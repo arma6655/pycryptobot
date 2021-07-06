@@ -2,8 +2,9 @@ import re
 
 import keyring
 
-from .default_parser import (defaultConfigParse, isCurrencyValid,
-                             merge_config_and_args)
+from .default_parser import defaultConfigParse
+from .default_parser import isCurrencyValid
+from .default_parser import merge_config_and_args
 
 
 def isMarketValid(market) -> bool:

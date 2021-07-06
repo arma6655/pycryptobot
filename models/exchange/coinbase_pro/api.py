@@ -1,5 +1,4 @@
 """Remotely control your Coinbase Pro account via their API"""
-
 import base64
 import hashlib
 import hmac

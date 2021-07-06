@@ -8,7 +8,8 @@ import pandas
 import pytest
 import urllib3
 
-from models.exchange.binance import AuthAPI, PublicAPI
+from models.exchange.binance import AuthAPI
+from models.exchange.binance import PublicAPI
 from models.helper.LogHelper import Logger
 
 # disable insecure ssl warning

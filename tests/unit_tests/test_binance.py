@@ -7,7 +7,8 @@ import pandas
 import pytest
 import urllib3
 
-from models.exchange.binance import AuthAPI, PublicAPI
+from models.exchange.binance import AuthAPI
+from models.exchange.binance import PublicAPI
 
 BINANCE_CONFIG_JSON = "binance_config.json"
 MOCK_MARKET = "BTCEUR"
