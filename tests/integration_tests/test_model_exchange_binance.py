@@ -8,37 +8,36 @@ import pandas
 import pytest
 import urllib3
 
+from models.exchange.binance import AuthAPI
+from models.exchange.binance import PublicAPI
+from models.helper.LogHelper import Logger
+
 # disable insecure ssl warning
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-sys.path.append('.')
+sys.path.append(".")
 # pylint: disable=import-error
-from models.exchange.binance import AuthAPI, PublicAPI
-from models.helper.LogHelper import Logger
 Logger.configure()
 
-
 # there is no dynamic way of retrieving a valid order market
-VALID_ORDER_MARKET = 'DOGEUSDT'
+VALID_ORDER_MARKET = "DOGEUSDT"
 
 
 def get_api_settings(filename):
     with open(filename) as config_file:
         config = json.load(config_file)
-    api_key = ''
-    api_secret = ''
-    api_url = ''
-    if 'api_key' in config and 'api_pass' in config and 'api_url' in config:
-        api_key = config['api_key']
+    api_key = ""
+    api_secret = ""
+    api_url = ""
+    if "api_key" in config and "api_pass" in config and "api_url" in config:
+        api_key = config["api_key"]
         api_secret = keyring.get_password("pycryptobot", api_key)
-        api_url = config['api_url']
-    elif 'api_key' in config['binance'] and 'api_url' in config['binance']:
-        api_key = config['binance']['api_key']
+        api_url = config["api_url"]
+    elif "api_key" in config["binance"] and "api_url" in config["binance"]:
+        api_key = config["binance"]["api_key"]
         api_secret = keyring.get_password("pycryptobot", api_key)
-        api_url = config['binance']['api_url']
-    return {
-        api_key, api_secret, api_url
-    }
+        api_url = config["binance"]["api_url"]
+    return {api_key, api_secret, api_url}
 
 
 def test_instantiate_authapi_without_error():
@@ -54,7 +53,7 @@ def test_instantiate_authapi_with_api_key_error():
 
     with pytest.raises(SystemExit) as execinfo:
         AuthAPI(api_key, api_secret)
-    assert str(execinfo.value) == 'Binance API key is invalid'
+    assert str(execinfo.value) == "Binance API key is invalid"
 
 
 def test_instantiate_authapi_with_api_secret_error():
@@ -63,7 +62,7 @@ def test_instantiate_authapi_with_api_secret_error():
 
     with pytest.raises(SystemExit) as execinfo:
         AuthAPI(api_key, api_secret)
-    assert str(execinfo.value) == 'Binance API secret is invalid'
+    assert str(execinfo.value) == "Binance API secret is invalid"
 
 
 def test_instantiate_authapi_with_api_url_error():
@@ -73,7 +72,7 @@ def test_instantiate_authapi_with_api_url_error():
 
     with pytest.raises(ValueError) as execinfo:
         AuthAPI(api_key, api_secret, api_url)
-    assert str(execinfo.value) == 'Binance API URL is invalid'
+    assert str(execinfo.value) == "Binance API URL is invalid"
 
 
 def test_instantiate_publicapi_without_error():
@@ -82,14 +81,14 @@ def test_instantiate_publicapi_without_error():
 
 
 def test_config_json_exists_and_valid():
-    filename = 'config.json'
+    filename = "config.json"
     assert os.path.exists(filename) is True
     (api_key, api_secret, api_url) = get_api_settings(filename)
     AuthAPI(api_key, api_secret, api_url)
 
 
 def test_getAccount():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
@@ -98,13 +97,13 @@ def test_getAccount():
     assert isinstance(df, pandas.core.frame.DataFrame)
 
     actual = df.columns.to_list()
-    expected = ['currency', 'balance', 'hold', 'available']
+    expected = ["currency", "balance", "hold", "available"]
     assert len(actual) == len(expected)
     assert all(a == b for a, b in zip(actual, expected))
 
 
 def test_getFeesWithoutMarket():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
@@ -115,13 +114,13 @@ def test_getFeesWithoutMarket():
     assert len(df) > 1
 
     actual = df.columns.to_list()
-    expected = ['maker_fee_rate', 'taker_fee_rate', 'usd_volume', 'market']
+    expected = ["maker_fee_rate", "taker_fee_rate", "usd_volume", "market"]
     assert len(actual) == len(expected)
     assert all(a == b for a, b in zip(actual, expected))
 
 
 def test_getFeesWithMarket():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
@@ -132,13 +131,13 @@ def test_getFeesWithMarket():
     assert len(df) == 1
 
     actual = df.columns.to_list()
-    expected = ['maker_fee_rate', 'taker_fee_rate', 'usd_volume', 'market']
+    expected = ["maker_fee_rate", "taker_fee_rate", "usd_volume", "market"]
     assert len(actual) == len(expected)
     assert all(a == b for a, b in zip(actual, expected))
 
 
 def test_getTakerFeeWithoutMarket():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
@@ -149,7 +148,7 @@ def test_getTakerFeeWithoutMarket():
 
 
 def test_getTakerFeeWithMarket():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
@@ -160,7 +159,7 @@ def test_getTakerFeeWithMarket():
 
 
 def test_getMakerFeeWithoutMarket():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
@@ -171,7 +170,7 @@ def test_getMakerFeeWithoutMarket():
 
 
 def test_getMakerFeeWithMarket():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
@@ -182,7 +181,7 @@ def test_getMakerFeeWithMarket():
 
 
 def test_getOrders():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
@@ -192,7 +191,16 @@ def test_getOrders():
     assert len(df) > 0
 
     actual = df.columns.to_list()
-    expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+    expected = [
+        "created_at",
+        "market",
+        "action",
+        "type",
+        "size",
+        "filled",
+        "status",
+        "price",
+    ]
     #  order is not important, but no duplicate
     assert len(actual) == len(expected)
     diff = set(actual) ^ set(expected)
@@ -200,18 +208,18 @@ def test_getOrders():
 
 
 def test_getOrdersInvalidMarket():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
     with pytest.raises(ValueError) as execinfo:
-        exchange.getOrders(market='ERROR')
-    assert str(execinfo.value) == 'Binance market is invalid.'
+        exchange.getOrders(market="ERROR")
+    assert str(execinfo.value) == "Binance market is invalid."
 
 
 def test_getOrdersValidMarket():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
@@ -221,7 +229,16 @@ def test_getOrdersValidMarket():
     assert len(df) > 0
 
     actual = df.columns.to_list()
-    expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+    expected = [
+        "created_at",
+        "market",
+        "action",
+        "type",
+        "size",
+        "filled",
+        "status",
+        "price",
+    ]
     #  order is not important, but no duplicate
     assert len(actual) == len(expected)
     diff = set(actual) ^ set(expected)
@@ -229,28 +246,37 @@ def test_getOrdersValidMarket():
 
 
 def test_getOrdersInvalidAction():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
     with pytest.raises(ValueError) as execinfo:
-        exchange.getOrders(action='ERROR')
-    assert str(execinfo.value) == 'Invalid order action.'
+        exchange.getOrders(action="ERROR")
+    assert str(execinfo.value) == "Invalid order action."
 
 
 def test_getOrdersValidActionBuy():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
-    df = exchange.getOrders(market=VALID_ORDER_MARKET, action='buy')
+    df = exchange.getOrders(market=VALID_ORDER_MARKET, action="buy")
 
     assert len(df) >= 0
 
     actual = df.columns.to_list()
-    expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+    expected = [
+        "created_at",
+        "market",
+        "action",
+        "type",
+        "size",
+        "filled",
+        "status",
+        "price",
+    ]
     #  order is not important, but no duplicate
     assert len(actual) == len(expected)
     diff = set(actual) ^ set(expected)
@@ -258,17 +284,26 @@ def test_getOrdersValidActionBuy():
 
 
 def test_getOrdersValidActionSell():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
-    df = exchange.getOrders(market=VALID_ORDER_MARKET, action='sell')
+    df = exchange.getOrders(market=VALID_ORDER_MARKET, action="sell")
 
     assert len(df) >= 0
 
     actual = df.columns.to_list()
-    expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+    expected = [
+        "created_at",
+        "market",
+        "action",
+        "type",
+        "size",
+        "filled",
+        "status",
+        "price",
+    ]
     #  order is not important, but no duplicate
     assert len(actual) == len(expected)
     diff = set(actual) ^ set(expected)
@@ -276,27 +311,36 @@ def test_getOrdersValidActionSell():
 
 
 def test_getOrdersInvalidStatus():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
     with pytest.raises(ValueError) as execinfo:
-        exchange.getOrders(status='ERROR')
-    assert str(execinfo.value) == 'Invalid order status.'
+        exchange.getOrders(status="ERROR")
+    assert str(execinfo.value) == "Invalid order status."
 
 
 def test_getOrdersValidStatusAll():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
-    df = exchange.getOrders(market=VALID_ORDER_MARKET, status='all')
+    df = exchange.getOrders(market=VALID_ORDER_MARKET, status="all")
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+        expected = [
+            "created_at",
+            "market",
+            "action",
+            "type",
+            "size",
+            "filled",
+            "status",
+            "price",
+        ]
         #  order is not important, but no duplicate
         assert len(actual) == len(expected)
         diff = set(actual) ^ set(expected)
@@ -304,16 +348,25 @@ def test_getOrdersValidStatusAll():
 
 
 def test_getOrdersValidStatusOpen():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
-    df = exchange.getOrders(market=VALID_ORDER_MARKET, status='open')
+    df = exchange.getOrders(market=VALID_ORDER_MARKET, status="open")
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+        expected = [
+            "created_at",
+            "market",
+            "action",
+            "type",
+            "size",
+            "filled",
+            "status",
+            "price",
+        ]
         #  order is not important, but no duplicate
         assert len(actual) == len(expected)
         diff = set(actual) ^ set(expected)
@@ -321,16 +374,25 @@ def test_getOrdersValidStatusOpen():
 
 
 def test_getOrdersValidStatusPending():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
-    df = exchange.getOrders(market=VALID_ORDER_MARKET, status='pending')
+    df = exchange.getOrders(market=VALID_ORDER_MARKET, status="pending")
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+        expected = [
+            "created_at",
+            "market",
+            "action",
+            "type",
+            "size",
+            "filled",
+            "status",
+            "price",
+        ]
         #  order is not important, but no duplicate
         assert len(actual) == len(expected)
         diff = set(actual) ^ set(expected)
@@ -338,16 +400,25 @@ def test_getOrdersValidStatusPending():
 
 
 def test_getOrdersValidStatusDone():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
-    df = exchange.getOrders(market=VALID_ORDER_MARKET, status='done')
+    df = exchange.getOrders(market=VALID_ORDER_MARKET, status="done")
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+        expected = [
+            "created_at",
+            "market",
+            "action",
+            "type",
+            "size",
+            "filled",
+            "status",
+            "price",
+        ]
         #  order is not important, but no duplicate
         assert len(actual) == len(expected)
         diff = set(actual) ^ set(expected)
@@ -355,16 +426,25 @@ def test_getOrdersValidStatusDone():
 
 
 def test_getOrdersValidStatusActive():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
-    df = exchange.getOrders(market=VALID_ORDER_MARKET, status='active')
+    df = exchange.getOrders(market=VALID_ORDER_MARKET, status="active")
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+        expected = [
+            "created_at",
+            "market",
+            "action",
+            "type",
+            "size",
+            "filled",
+            "status",
+            "price",
+        ]
         #  order is not important, but no duplicate
         assert len(actual) == len(expected)
         diff = set(actual) ^ set(expected)
@@ -372,7 +452,7 @@ def test_getOrdersValidStatusActive():
 
 
 def test_getTime():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
@@ -382,11 +462,11 @@ def test_getTime():
 
 
 def test_marketBuyInvalidMarket():
-    filename = 'config.json'
+    filename = "config.json"
     (api_key, api_secret, api_url) = get_api_settings(filename)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
     with pytest.raises(ValueError) as execinfo:
-        exchange.marketBuy('ERROR', -1)
-    assert str(execinfo.value) == 'Binance market is invalid.'
+        exchange.marketBuy("ERROR", -1)
+    assert str(execinfo.value) == "Binance market is invalid."
