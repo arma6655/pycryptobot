@@ -1,5 +1,3 @@
-from models.helper.LogHelper import Logger
-from models.exchange.binance import AuthAPI, PublicAPI
 import json
 import os
 import sys
@@ -9,6 +7,9 @@ import keyring
 import pandas
 import pytest
 import urllib3
+
+from models.exchange.binance import AuthAPI, PublicAPI
+from models.helper.LogHelper import Logger
 
 # disable insecure ssl warning
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

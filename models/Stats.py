@@ -1,8 +1,9 @@
 import sys
 from datetime import datetime, timedelta
+
+from models.helper.LogHelper import Logger
 from models.PyCryptoBot import PyCryptoBot
 from models.TradingAccount import TradingAccount
-from models.helper.LogHelper import Logger
 
 
 class Stats:

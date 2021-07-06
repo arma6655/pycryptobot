@@ -1,8 +1,10 @@
 from datetime import datetime
+
 from pandas import DataFrame
-from models.PyCryptoBot import PyCryptoBot
+
 from models.AppState import AppState
 from models.helper.LogHelper import Logger
+from models.PyCryptoBot import PyCryptoBot
 
 
 class Strategy:

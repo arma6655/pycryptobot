@@ -1,5 +1,3 @@
-from models.helper.LogHelper import Logger
-from models.exchange.coinbase_pro import AuthAPI, PublicAPI
 import json
 import os
 import sys
@@ -9,6 +7,9 @@ from datetime import datetime
 import keyring
 import pandas
 import pytest
+
+from models.exchange.coinbase_pro import AuthAPI, PublicAPI
+from models.helper.LogHelper import Logger
 
 sys.path.append(".")
 # pylint: disable=import-error

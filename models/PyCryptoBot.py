@@ -13,20 +13,17 @@ import pandas as pd
 import urllib3
 from urllib3.exceptions import ReadTimeoutError
 
-from models.ConfigBuilder import ConfigBuilder
-from models.Trading import TechnicalAnalysis
 from models.chat import Telegram
-from models.config import (
-    binanceConfigParser,
-    binanceParseMarket,
-    coinbaseProConfigParser,
-    coinbaseProParseMarket,
-    dummyConfigParser,
-    loggerConfigParser,
-)
-from models.exchange.binance import AuthAPI as BAuthAPI, PublicAPI as BPublicAPI
-from models.exchange.coinbase_pro import AuthAPI as CBAuthAPI, PublicAPI as CBPublicAPI
+from models.config import (binanceConfigParser, binanceParseMarket,
+                           coinbaseProConfigParser, coinbaseProParseMarket,
+                           dummyConfigParser, loggerConfigParser)
+from models.ConfigBuilder import ConfigBuilder
+from models.exchange.binance import AuthAPI as BAuthAPI
+from models.exchange.binance import PublicAPI as BPublicAPI
+from models.exchange.coinbase_pro import AuthAPI as CBAuthAPI
+from models.exchange.coinbase_pro import PublicAPI as CBPublicAPI
 from models.helper.LogHelper import Logger
+from models.Trading import TechnicalAnalysis
 
 # disable insecure ssl warning
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
