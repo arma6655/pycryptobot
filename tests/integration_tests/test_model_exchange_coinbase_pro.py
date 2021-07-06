@@ -1,3 +1,5 @@
+from models.helper.LogHelper import Logger
+from models.exchange.coinbase_pro import AuthAPI, PublicAPI
 import json
 import os
 import sys
@@ -10,8 +12,6 @@ import pytest
 
 sys.path.append('.')
 # pylint: disable=import-error
-from models.exchange.coinbase_pro import AuthAPI, PublicAPI
-from models.helper.LogHelper import Logger
 Logger.configure()
 
 DEFAULT_ORDER_MARKET = 'BTC-GBP'
@@ -149,7 +149,8 @@ def test_getAccounts():
     assert isinstance(df, pandas.core.frame.DataFrame)
 
     actual = df.columns.to_list()
-    expected = ['index', 'id', 'currency', 'balance', 'hold', 'available', 'profile_id', 'trading_enabled']
+    expected = ['index', 'id', 'currency', 'balance',
+                'hold', 'available', 'profile_id', 'trading_enabled']
     assert len(actual) == len(expected)
     assert all(a == b for a, b in zip(actual, expected))
 
@@ -174,7 +175,8 @@ def test_getAccount():
     assert len(df) == 1
 
     actual = df.columns.to_list()
-    expected = ['id', 'currency', 'balance', 'hold', 'available', 'profile_id', 'trading_enabled']
+    expected = ['id', 'currency', 'balance', 'hold',
+                'available', 'profile_id', 'trading_enabled']
     assert len(actual) == len(expected)
     assert all(a == b for a, b in zip(actual, expected))
 
@@ -287,7 +289,8 @@ def test_getOrders():
     assert len(df) > 0
 
     actual = df.columns.to_list()
-    expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'fees', 'price', 'status']
+    expected = ['created_at', 'market', 'action', 'type',
+                'size', 'filled', 'fees', 'price', 'status']
     assert len(actual) == len(expected)
     assert all(a == b for a, b in zip(actual, expected))
 
@@ -316,7 +319,8 @@ def test_getOrdersValidMarket():
     assert len(df) > 0
 
     actual = df.columns.to_list()
-    expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'fees', 'price', 'status']
+    expected = ['created_at', 'market', 'action', 'type',
+                'size', 'filled', 'fees', 'price', 'status']
     assert len(actual) == len(expected)
     assert all(a == b for a, b in zip(actual, expected))
 
@@ -345,7 +349,8 @@ def test_getOrdersValidActionBuy():
     assert len(df) >= 0
 
     actual = df.columns.to_list()
-    expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'fees', 'price', 'status']
+    expected = ['created_at', 'market', 'action', 'type',
+                'size', 'filled', 'fees', 'price', 'status']
     assert len(actual) == len(expected)
     assert all(a == b for a, b in zip(actual, expected))
 
@@ -362,7 +367,8 @@ def test_getOrdersValidActionSell():
     assert len(df) >= 0
 
     actual = df.columns.to_list()
-    expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'fees', 'price', 'status']
+    expected = ['created_at', 'market', 'action', 'type',
+                'size', 'filled', 'fees', 'price', 'status']
     assert len(actual) == len(expected)
     assert all(a == b for a, b in zip(actual, expected))
 
@@ -390,7 +396,8 @@ def test_getOrdersValidStatusAll():
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'fees', 'price', 'status']
+        expected = ['created_at', 'market', 'action', 'type',
+                    'size', 'filled', 'fees', 'price', 'status']
         assert len(actual) == len(expected)
         assert all(a == b for a, b in zip(actual, expected))
 
@@ -406,7 +413,8 @@ def test_getOrdersValidStatusOpen():
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'value', 'status', 'price']
+        expected = ['created_at', 'market', 'action',
+                    'type', 'size', 'value', 'status', 'price']
         assert len(actual) == len(expected)
         assert all(a == b for a, b in zip(actual, expected))
 
@@ -422,7 +430,8 @@ def test_getOrdersValidStatusPending():
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'value', 'status', 'price']
+        expected = ['created_at', 'market', 'action',
+                    'type', 'size', 'value', 'status', 'price']
         assert len(actual) == len(expected)
         assert all(a == b for a, b in zip(actual, expected))
 
@@ -438,7 +447,8 @@ def test_getOrdersValidStatusDone():
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'fees', 'price', 'status']
+        expected = ['created_at', 'market', 'action', 'type',
+                    'size', 'filled', 'fees', 'price', 'status']
         assert len(actual) == len(expected)
         assert all(a == b for a, b in zip(actual, expected))
 
@@ -454,7 +464,8 @@ def test_getOrdersValidStatusActive():
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'value', 'status', 'price']
+        expected = ['created_at', 'market', 'action',
+                    'type', 'size', 'value', 'status', 'price']
         assert len(actual) == len(expected)
         assert all(a == b for a, b in zip(actual, expected))
 

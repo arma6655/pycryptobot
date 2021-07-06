@@ -53,7 +53,8 @@ def parser(app, binance_config, args=None):
 
     if 'api_key' in binance_config:
         print('* "api_key / secret" should be saved in a separate file referred as "api_key_file"')
-        print('* the file should be a simple text file with key / secret on separate lines\n')
+        print(
+            '* the file should be a simple text file with key / secret on separate lines\n')
 
     if 'api_key_file' in binance_config:
         try:
@@ -63,7 +64,8 @@ def parser(app, binance_config, args=None):
             binance_config['api_key'] = key
             binance_config['api_secret'] = secret
         except:
-            raise RuntimeError('Unable to read ' + binance_config['api_key_file'])
+            raise RuntimeError('Unable to read ' +
+                               binance_config['api_key_file'])
 
     if 'api_key' not in binance_config or 'api_url' not in binance_config:
         raise Exception('There is an error in your config dictionary')
@@ -112,7 +114,8 @@ def parser(app, binance_config, args=None):
         app.quote_currency = config['quote_currency']
 
     if 'market' in config and config['market'] is not None:
-        app.market, app.base_currency, app.quote_currency = parseMarket(config['market'])
+        app.market, app.base_currency, app.quote_currency = parseMarket(
+            config['market'])
 
     if app.base_currency != '' and app.quote_currency != '':
         app.market = app.base_currency + app.quote_currency

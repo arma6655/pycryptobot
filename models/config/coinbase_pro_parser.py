@@ -34,16 +34,17 @@ def parser(app, coinbase_config, args=None):
         print('* the file should be a simple text file with key/secret/passwd on separate lines\n')
 
     if 'api_key_file' in coinbase_config:
-        try :
-            with open( coinbase_config['api_key_file'], 'r') as f :
+        try:
+            with open(coinbase_config['api_key_file'], 'r') as f:
                 key = f.readline().strip()
                 secret = f.readline().strip()
                 password = f.readline().strip()
             coinbase_config['api_key'] = key
             coinbase_config['api_secret'] = secret
             coinbase_config['api_passphrase'] = password
-        except :
-            raise RuntimeError('Unable to read ' + coinbase_config['api_key_file'])
+        except:
+            raise RuntimeError('Unable to read ' +
+                               coinbase_config['api_key_file'])
 
     if 'api_key' in coinbase_config and 'api_passphrase' in coinbase_config and 'api_url' in coinbase_config:
 
@@ -97,7 +98,8 @@ def parser(app, coinbase_config, args=None):
             app.quote_currency = config['quote_currency']
 
         if 'market' in config and config['market'] is not None:
-            app.market, app.base_currency, app.quote_currency = parseMarket(config['market'])
+            app.market, app.base_currency, app.quote_currency = parseMarket(
+                config['market'])
 
         if app.base_currency != '' and app.quote_currency != '':
             app.market = app.base_currency + '-' + app.quote_currency

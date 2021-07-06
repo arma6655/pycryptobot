@@ -40,12 +40,12 @@ def defaultConfigParse(app, config):
 
     if 'sim' in config:
         if isinstance(config['sim'], str):
-            if config['sim'] in [ 'slow', 'fast']:
+            if config['sim'] in ['slow', 'fast']:
                 app.is_live = 0
                 app.is_sim = 1
                 app.sim_speed = config['sim']
 
-            if config['sim'] in ['slow-sample', 'fast-sample' ]:
+            if config['sim'] in ['slow-sample', 'fast-sample']:
                 app.is_live = 0
                 app.is_sim = 1
                 app.sim_speed = config['sim']
@@ -79,12 +79,12 @@ def defaultConfigParse(app, config):
             p = re.compile(r"^\-*[0-9\.]{1,5}$")
             if isinstance(config['selllowerpcnt'], str) and p.match(config['selllowerpcnt']):
                 if float(config['selllowerpcnt']) < 0:
-                    app.sell_lower_pcnt  = float(config['selllowerpcnt'])
+                    app.sell_lower_pcnt = float(config['selllowerpcnt'])
                 else:
                     raise ValueError('selllowerpcnt must be negative')
             elif isinstance(config['selllowerpcnt'], (int, float)) and config['selllowerpcnt'] >= -100 and config['selllowerpcnt'] <= 0:
                 if float(config['selllowerpcnt']) < 0:
-                    app.sell_lower_pcnt  = float(config['selllowerpcnt'])
+                    app.sell_lower_pcnt = float(config['selllowerpcnt'])
                 else:
                     raise ValueError('selllowerpcnt must be negative')
             elif isinstance(config['selllowerpcnt'], (int, float)) and config['selllowerpcnt'] >= 0:
@@ -97,12 +97,12 @@ def defaultConfigParse(app, config):
             p = re.compile(r"^\-*[0-9\.]{1,5}$")
             if isinstance(config['trailingstoploss'], str) and p.match(config['trailingstoploss']):
                 if float(config['trailingstoploss']) < 0:
-                    app.trailing_stop_loss  = float(config['trailingstoploss'])
+                    app.trailing_stop_loss = float(config['trailingstoploss'])
                 else:
                     raise ValueError('trailingstoploss must be negative')
             elif isinstance(config['trailingstoploss'], (int, float)) and config['trailingstoploss'] >= -100 and config['trailingstoploss'] <= 0:
                 if float(config['trailingstoploss']) < 0:
-                    app.trailing_stop_loss  = float(config['trailingstoploss'])
+                    app.trailing_stop_loss = float(config['trailingstoploss'])
                 else:
                     raise ValueError('trailingstoploss must be negative')
             elif isinstance(config['trailingstoploss'], (int, float)) and config['trailingstoploss'] >= 0:
@@ -112,7 +112,7 @@ def defaultConfigParse(app, config):
 
     if 'autorestart' in config:
         if isinstance(config['autorestart'], int):
-            if config['autorestart'] in [ 0, 1 ]:
+            if config['autorestart'] in [0, 1]:
                 app.autorestart = bool(config['autorestart'])
         else:
             raise TypeError('autorestart must be of type int')
@@ -132,7 +132,7 @@ def defaultConfigParse(app, config):
 
     if 'sellatloss' in config:
         if isinstance(config['sellatloss'], int):
-            if config['sellatloss'] in [ 0, 1 ]:
+            if config['sellatloss'] in [0, 1]:
                 app.sell_at_loss = config['sellatloss']
                 if app.sell_at_loss == 0:
                     app.sell_lower_pcnt = None
@@ -141,7 +141,7 @@ def defaultConfigParse(app, config):
 
     if 'sellatresistance' in config:
         if isinstance(config['sellatresistance'], int):
-            if config['sellatresistance'] in [ 0, 1 ]:
+            if config['sellatresistance'] in [0, 1]:
                 app.sellatresistance = bool(config['sellatresistance'])
         else:
             raise TypeError('sellatresistance must be of type int')
@@ -233,7 +233,7 @@ def defaultConfigParse(app, config):
     # backward compatibility
     if 'nosellatloss' in config:
         if isinstance(config['nosellatloss'], int):
-            if config['nosellatloss'] in [ 0, 1 ]:
+            if config['nosellatloss'] in [0, 1]:
                 app.sell_at_loss = int(not config['nosellatloss'])
                 if app.sell_at_loss == 0:
                     app.sell_lower_pcnt = None
@@ -243,7 +243,7 @@ def defaultConfigParse(app, config):
 
     if 'smartswitch' in config:
         if isinstance(config['smartswitch'], int):
-            if config['smartswitch'] in [ 0, 1 ]:
+            if config['smartswitch'] in [0, 1]:
                 app.smart_switch = config['smartswitch']
                 if app.smart_switch == 1:
                     app.smart_switch = 1
@@ -268,7 +268,7 @@ def defaultConfigParse(app, config):
 
     if 'lastaction' in config:
         if isinstance(config['lastaction'], str):
-            if config['lastaction'] in [ 'BUY', 'SELL' ]:
+            if config['lastaction'] in ['BUY', 'SELL']:
                 app.last_action = config['lastaction']
         else:
             raise TypeError('lastaction must be of type str')

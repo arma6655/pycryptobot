@@ -1,3 +1,5 @@
+from models.helper.LogHelper import Logger
+from models.exchange.binance import AuthAPI, PublicAPI
 import json
 import os
 import sys
@@ -13,8 +15,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 sys.path.append('.')
 # pylint: disable=import-error
-from models.exchange.binance import AuthAPI, PublicAPI
-from models.helper.LogHelper import Logger
 Logger.configure()
 
 
@@ -192,7 +192,8 @@ def test_getOrders():
     assert len(df) > 0
 
     actual = df.columns.to_list()
-    expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+    expected = ['created_at', 'market', 'action',
+                'type', 'size', 'filled', 'status', 'price']
     #  order is not important, but no duplicate
     assert len(actual) == len(expected)
     diff = set(actual) ^ set(expected)
@@ -221,7 +222,8 @@ def test_getOrdersValidMarket():
     assert len(df) > 0
 
     actual = df.columns.to_list()
-    expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+    expected = ['created_at', 'market', 'action',
+                'type', 'size', 'filled', 'status', 'price']
     #  order is not important, but no duplicate
     assert len(actual) == len(expected)
     diff = set(actual) ^ set(expected)
@@ -250,7 +252,8 @@ def test_getOrdersValidActionBuy():
     assert len(df) >= 0
 
     actual = df.columns.to_list()
-    expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+    expected = ['created_at', 'market', 'action',
+                'type', 'size', 'filled', 'status', 'price']
     #  order is not important, but no duplicate
     assert len(actual) == len(expected)
     diff = set(actual) ^ set(expected)
@@ -268,7 +271,8 @@ def test_getOrdersValidActionSell():
     assert len(df) >= 0
 
     actual = df.columns.to_list()
-    expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+    expected = ['created_at', 'market', 'action',
+                'type', 'size', 'filled', 'status', 'price']
     #  order is not important, but no duplicate
     assert len(actual) == len(expected)
     diff = set(actual) ^ set(expected)
@@ -296,7 +300,8 @@ def test_getOrdersValidStatusAll():
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+        expected = ['created_at', 'market', 'action',
+                    'type', 'size', 'filled', 'status', 'price']
         #  order is not important, but no duplicate
         assert len(actual) == len(expected)
         diff = set(actual) ^ set(expected)
@@ -313,7 +318,8 @@ def test_getOrdersValidStatusOpen():
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+        expected = ['created_at', 'market', 'action',
+                    'type', 'size', 'filled', 'status', 'price']
         #  order is not important, but no duplicate
         assert len(actual) == len(expected)
         diff = set(actual) ^ set(expected)
@@ -330,7 +336,8 @@ def test_getOrdersValidStatusPending():
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+        expected = ['created_at', 'market', 'action',
+                    'type', 'size', 'filled', 'status', 'price']
         #  order is not important, but no duplicate
         assert len(actual) == len(expected)
         diff = set(actual) ^ set(expected)
@@ -347,7 +354,8 @@ def test_getOrdersValidStatusDone():
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+        expected = ['created_at', 'market', 'action',
+                    'type', 'size', 'filled', 'status', 'price']
         #  order is not important, but no duplicate
         assert len(actual) == len(expected)
         diff = set(actual) ^ set(expected)
@@ -364,7 +372,8 @@ def test_getOrdersValidStatusActive():
 
     if len(df) != 0:
         actual = df.columns.to_list()
-        expected = ['created_at', 'market', 'action', 'type', 'size', 'filled', 'status', 'price']
+        expected = ['created_at', 'market', 'action',
+                    'type', 'size', 'filled', 'status', 'price']
         #  order is not important, but no duplicate
         assert len(actual) == len(expected)
         diff = set(actual) ^ set(expected)
