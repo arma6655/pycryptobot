@@ -86,18 +86,35 @@ def test_config_json_exists_and_valid():
 
 def test_get_account(mocker):
     client_response = {
-        "makerCommission": 10,
-        "takerCommission": 10,
-        "buyerCommission": 0,
-        "sellerCommission": 0,
-        "canTrade": True,
-        "canWithdraw": True,
-        "canDeposit": True,
-        "updateTime": 1620861508183,
-        "accountType": "SPOT",
+        "makerCommission":
+        10,
+        "takerCommission":
+        10,
+        "buyerCommission":
+        0,
+        "sellerCommission":
+        0,
+        "canTrade":
+        True,
+        "canWithdraw":
+        True,
+        "canDeposit":
+        True,
+        "updateTime":
+        1620861508183,
+        "accountType":
+        "SPOT",
         "balances": [
-            {"asset": "BTC", "free": "0.00000000", "locked": "0.00000000"},
-            {"asset": "LTC", "free": "0.00000000", "locked": "0.24944000"},
+            {
+                "asset": "BTC",
+                "free": "0.00000000",
+                "locked": "0.00000000"
+            },
+            {
+                "asset": "LTC",
+                "free": "0.00000000",
+                "locked": "0.24944000"
+            },
         ],
         "permissions": ["SPOT"],
     }
@@ -106,9 +123,8 @@ def test_get_account(mocker):
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
-    mocker.patch(
-        "models.exchange.binance.Client.get_account", return_value=client_response
-    )
+    mocker.patch("models.exchange.binance.Client.get_account",
+                 return_value=client_response)
     df = exchange.getAccount()
     assert isinstance(df, pandas.core.frame.DataFrame)
 
@@ -121,15 +137,18 @@ def test_get_account(mocker):
 def test_get_fees_with_market(mocker):
     client_response = {
         "success": True,
-        "tradeFee": [{"maker": 0.001, "symbol": "CHZUSDT", "taker": 0.001}],
+        "tradeFee": [{
+            "maker": 0.001,
+            "symbol": "CHZUSDT",
+            "taker": 0.001
+        }],
     }
     (api_key, api_secret, api_url) = get_api_settings(BINANCE_CONFIG_JSON)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
-    mocker.patch(
-        "models.exchange.binance.Client.get_trade_fee", return_value=client_response
-    )
+    mocker.patch("models.exchange.binance.Client.get_trade_fee",
+                 return_value=client_response)
     df = exchange.getFees(MOCK_MARKET)
     assert isinstance(df, pandas.core.frame.DataFrame)
 
@@ -144,15 +163,18 @@ def test_get_fees_with_market(mocker):
 def test_get_taker_fee_with_market(mocker):
     client_response = {
         "success": True,
-        "tradeFee": [{"maker": 0.001, "symbol": "CHZUSDT", "taker": 0.001}],
+        "tradeFee": [{
+            "maker": 0.001,
+            "symbol": "CHZUSDT",
+            "taker": 0.001
+        }],
     }
     (api_key, api_secret, api_url) = get_api_settings(BINANCE_CONFIG_JSON)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
-    mocker.patch(
-        "models.exchange.binance.Client.get_trade_fee", return_value=client_response
-    )
+    mocker.patch("models.exchange.binance.Client.get_trade_fee",
+                 return_value=client_response)
     fee = exchange.getTakerFee(MOCK_MARKET)
     assert isinstance(fee, float)
     assert fee == 0.001
@@ -161,15 +183,18 @@ def test_get_taker_fee_with_market(mocker):
 def test_get_maker_fee_with_market(mocker):
     client_response = {
         "success": True,
-        "tradeFee": [{"maker": 0.001, "symbol": "CHZUSDT", "taker": 0.001}],
+        "tradeFee": [{
+            "maker": 0.001,
+            "symbol": "CHZUSDT",
+            "taker": 0.001
+        }],
     }
     (api_key, api_secret, api_url) = get_api_settings(BINANCE_CONFIG_JSON)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
 
-    mocker.patch(
-        "models.exchange.binance.Client.get_trade_fee", return_value=client_response
-    )
+    mocker.patch("models.exchange.binance.Client.get_trade_fee",
+                 return_value=client_response)
     fee = exchange.getMakerFee(MOCK_MARKET)
     assert isinstance(fee, float)
     assert fee == 0.001
@@ -177,35 +202,32 @@ def test_get_maker_fee_with_market(mocker):
 
 @pytest.mark.skip(reason="further work required to get this working")
 def test_get_orders(mocker):
-    client_response = [
-        {
-            "symbol": "CHZUSDT",
-            "orderId": 123456789,
-            "orderListId": -1,
-            "clientOrderId": "SOME-CLIENT-ORDER-ID",
-            "price": "0.00000000",
-            "origQty": "31.30000000",
-            "executedQty": "31.30000000",
-            "cummulativeQuoteQty": "15.68161300",
-            "status": "FILLED",
-            "timeInForce": "GTC",
-            "type": "MARKET",
-            "side": "SELL",
-            "stopPrice": "0.00000000",
-            "icebergQty": "0.00000000",
-            "time": 1616845743872,
-            "updateTime": 1616845743872,
-            "isWorking": True,
-            "origQuoteOrderQty": "0.00000000",
-        }
-    ]
+    client_response = [{
+        "symbol": "CHZUSDT",
+        "orderId": 123456789,
+        "orderListId": -1,
+        "clientOrderId": "SOME-CLIENT-ORDER-ID",
+        "price": "0.00000000",
+        "origQty": "31.30000000",
+        "executedQty": "31.30000000",
+        "cummulativeQuoteQty": "15.68161300",
+        "status": "FILLED",
+        "timeInForce": "GTC",
+        "type": "MARKET",
+        "side": "SELL",
+        "stopPrice": "0.00000000",
+        "icebergQty": "0.00000000",
+        "time": 1616845743872,
+        "updateTime": 1616845743872,
+        "isWorking": True,
+        "origQuoteOrderQty": "0.00000000",
+    }]
 
     (api_key, api_secret, api_url) = get_api_settings(BINANCE_CONFIG_JSON)
     exchange = AuthAPI(api_key, api_secret, api_url)
     assert isinstance(exchange, AuthAPI)
-    mocker.patch(
-        "models.exchange.binance.Client.get_all_orders", return_value=client_response
-    )
+    mocker.patch("models.exchange.binance.Client.get_all_orders",
+                 return_value=client_response)
     df = exchange.getOrders(MOCK_MARKET)
 
     assert len(df) > 0

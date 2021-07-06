@@ -49,13 +49,11 @@ def parser(app, coinbase_config, args=None):
             coinbase_config["api_secret"] = secret
             coinbase_config["api_passphrase"] = password
         except:
-            raise RuntimeError("Unable to read " + coinbase_config["api_key_file"])
+            raise RuntimeError("Unable to read " +
+                               coinbase_config["api_key_file"])
 
-    if (
-        "api_key" in coinbase_config
-        and "api_passphrase" in coinbase_config
-        and "api_url" in coinbase_config
-    ):
+    if ("api_key" in coinbase_config and "api_passphrase" in coinbase_config
+            and "api_url" in coinbase_config):
 
         # validates the api key is syntactically correct
         api_key = coinbase_config["api_key"]
@@ -81,7 +79,9 @@ def parser(app, coinbase_config, args=None):
 
         app.api_passphrase = api_passphrase
 
-        valid_urls = ["https://api.pro.coinbase.com/", "https://api.pro.coinbase.com"]
+        valid_urls = [
+            "https://api.pro.coinbase.com/", "https://api.pro.coinbase.com"
+        ]
 
         # validate Coinbase Pro API
         if coinbase_config["api_url"] not in valid_urls:
@@ -105,18 +105,15 @@ def parser(app, coinbase_config, args=None):
 
         if "market" in config and config["market"] is not None:
             app.market, app.base_currency, app.quote_currency = parseMarket(
-                config["market"]
-            )
+                config["market"])
 
         if app.base_currency != "" and app.quote_currency != "":
             app.market = app.base_currency + "-" + app.quote_currency
 
         if "granularity" in config and config["granularity"] is not None:
             granularity = 0
-            if (
-                isinstance(config["granularity"], str)
-                and config["granularity"].isnumeric() is True
-            ):
+            if (isinstance(config["granularity"], str)
+                    and config["granularity"].isnumeric() is True):
                 granularity = int(config["granularity"])
             elif isinstance(config["granularity"], int):
                 granularity = config["granularity"]

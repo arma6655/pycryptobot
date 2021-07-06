@@ -24,15 +24,11 @@ class Telegram:
 
     def send(self, message="") -> str:
         try:
-            escaped_message = message.translate(message.maketrans({"*": r"\*"}))
-            payload = (
-                self.api
-                + self._token
-                + "/sendMessage?chat_id="
-                + self._client_id
-                + "&parse_mode=Markdown&text="
-                + escaped_message
-            )
+            escaped_message = message.translate(message.maketrans({"*":
+                                                                   r"\*"}))
+            payload = (self.api + self._token + "/sendMessage?chat_id=" +
+                       self._client_id + "&parse_mode=Markdown&text=" +
+                       escaped_message)
             resp = get(payload)
 
             if resp.status_code != 200:

@@ -40,18 +40,22 @@ class ConfigBuilder:
                         config["coinbasepro"]["api_key"] = api_key
 
                 while "api_secret" not in config["coinbasepro"]:
-                    api_secret = input("What is your Coinbase Pro API Secret? ")
+                    api_secret = input(
+                        "What is your Coinbase Pro API Secret? ")
                     p = re_compile(r"^[A-z0-9+\/]+==$")
                     if p.match(api_secret):
                         config["coinbasepro"]["api_secret"] = api_secret
-                        keyring.set_password("pycryptobot", api_key, api_secret)
+                        keyring.set_password("pycryptobot", api_key,
+                                             api_secret)
                 config["coinbasepro"].pop("api_secret")
 
                 while "api_passphrase" not in config["coinbasepro"]:
-                    api_passphrase = input("What is your Coinbase Pro API Passphrase? ")
+                    api_passphrase = input(
+                        "What is your Coinbase Pro API Passphrase? ")
                     p = re_compile(r"^[a-z0-9]{10,11}$")
                     if p.match(api_passphrase):
-                        config["coinbasepro"]["api_passphrase"] = api_passphrase
+                        config["coinbasepro"][
+                            "api_passphrase"] = api_passphrase
             else:
                 config["coinbasepro"]["api_key"] = "<fill in>"
                 config["coinbasepro"]["api_secret"] = "<fill in>"
@@ -65,7 +69,8 @@ class ConfigBuilder:
                 )
                 p = re_compile(r"^[A-Z0-9]{3,7}$")
                 if p.match(base_currency):
-                    config["coinbasepro"]["config"]["base_currency"] = base_currency
+                    config["coinbasepro"]["config"][
+                        "base_currency"] = base_currency
 
             while "quote_currency" not in config["coinbasepro"]["config"]:
                 quote_currency = input(
@@ -73,7 +78,8 @@ class ConfigBuilder:
                 )
                 p = re_compile(r"^[A-Z0-9]{3,7}$")
                 if p.match(quote_currency):
-                    config["coinbasepro"]["config"]["quote_currency"] = quote_currency
+                    config["coinbasepro"]["config"][
+                        "quote_currency"] = quote_currency
 
             choice = input(
                 "Do you want to smart switch between 1 hour and 15 minute intervals (1=yes:default, 2=no)? "
@@ -84,7 +90,8 @@ class ConfigBuilder:
                         "What granularity do you want to trade? (60, 300, 900, 3600, 21600, 86400)? "
                     )
                     if int(choice) in [60, 300, 900, 3600, 21600, 86400]:
-                        config["coinbasepro"]["config"]["granularity"] = int(choice)
+                        config["coinbasepro"]["config"]["granularity"] = int(
+                            choice)
 
             choice = input(
                 "Do you want to start live trading? (1=live, 2=test:default)? "
@@ -92,8 +99,7 @@ class ConfigBuilder:
             config["coinbasepro"]["config"]["live"] = 1 if choice == "1" else 0
 
         choice = input(
-            "Do you want to use the Binance exchange (1=yes, 2=no:default)? "
-        )
+            "Do you want to use the Binance exchange (1=yes, 2=no:default)? ")
         if choice == "1":
             self._b = 1
             config["binance"] = {"api_url": "https://api.binance.com"}
@@ -113,7 +119,8 @@ class ConfigBuilder:
                     p = re_compile(r"^[A-z0-9]{64,64}$")
                     if p.match(api_secret):
                         config["binance"]["api_secret"] = api_secret
-                        keyring.set_password("pycryptobot", api_key, api_secret)
+                        keyring.set_password("pycryptobot", api_key,
+                                             api_secret)
                 config["binance"].pop("api_secret")
             else:
                 config["binance"]["api_key"] = "<fill in>"
@@ -127,7 +134,8 @@ class ConfigBuilder:
                 )
                 p = re_compile(r"^[A-Z0-9]{3,7}$")
                 if p.match(base_currency):
-                    config["binance"]["config"]["base_currency"] = base_currency
+                    config["binance"]["config"][
+                        "base_currency"] = base_currency
 
             while "quote_currency" not in config["binance"]["config"]:
                 quote_currency = input(
@@ -135,7 +143,8 @@ class ConfigBuilder:
                 )
                 p = re_compile(r"^[A-Z0-9]{3,7}$")
                 if p.match(quote_currency):
-                    config["binance"]["config"]["quote_currency"] = quote_currency
+                    config["binance"]["config"][
+                        "quote_currency"] = quote_currency
 
             choice = input(
                 "Do you want to smart switch between 1 hour and 15 minute intervals (1=yes:default, 2=no)? "

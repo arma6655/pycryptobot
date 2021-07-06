@@ -19,7 +19,6 @@ sys.path.append(".")
 # pylint: disable=import-error
 Logger.configure()
 
-
 # there is no dynamic way of retrieving a valid order market
 VALID_ORDER_MARKET = "DOGEUSDT"
 

@@ -46,78 +46,54 @@ class Strategy:
                 raise AttributeError(f"'{indicator}' not in Pandas dataframe")
 
         # buy signal exclusion (if disabled, do not buy within 3% of the dataframe close high)
-        if (
-            self.state.last_action == "SELL"
-            and self.app.disableBuyNearHigh() is True
-            and (price > (self._df["close"].max() * 0.97))
-        ):
-            log_text = (
-                str(now)
-                + " | "
-                + self.app.getMarket()
-                + " | "
-                + self.app.printGranularity()
-                + " | Ignoring Buy Signal (price "
-                + str(price)
-                + " within 3% of high "
-                + str(self._df["close"].max())
-                + ")"
-            )
+        if (self.state.last_action == "SELL"
+                and self.app.disableBuyNearHigh() is True
+                and (price > (self._df["close"].max() * 0.97))):
+            log_text = (str(now) + " | " + self.app.getMarket() + " | " +
+                        self.app.printGranularity() +
+                        " | Ignoring Buy Signal (price " + str(price) +
+                        " within 3% of high " + str(self._df["close"].max()) +
+                        ")")
             Logger.warning(log_text)
 
             return False
 
         # criteria for a buy signal 1
-        if (
-            bool(self._df_last["ema12gtema26co"].values[0]) is True
-            and (
-                bool(self._df_last["macdgtsignal"].values[0]) is True
-                or self.app.disableBuyMACD()
-            )
-            and (
-                bool(self._df_last["goldencross"].values[0]) is True
-                or self.app.disableBullOnly()
-            )
-            and (
-                float(self._df_last["obv_pc"].values[0]) > -5
-                or self.app.disableBuyOBV()
-            )
-            and (
-                bool(self._df_last["eri_buy"].values[0]) is True
-                or self.app.disableBuyElderRay()
-            )
-            and self.state.last_action != "BUY"
-        ):  # required for all strategies
+        if (bool(self._df_last["ema12gtema26co"].values[0]) is True
+                and (bool(self._df_last["macdgtsignal"].values[0]) is True
+                     or self.app.disableBuyMACD())
+                and (bool(self._df_last["goldencross"].values[0]) is True
+                     or self.app.disableBullOnly())
+                and (float(self._df_last["obv_pc"].values[0]) > -5
+                     or self.app.disableBuyOBV())
+                and (bool(self._df_last["eri_buy"].values[0]) is True
+                     or self.app.disableBuyElderRay())
+                and self.state.last_action !=
+                "BUY"):  # required for all strategies
 
             Logger.debug("*** Buy Signal ***")
             for indicator in required_indicators:
-                Logger.debug(f"{indicator}: {self._df_last[indicator].values[0]}")
+                Logger.debug(
+                    f"{indicator}: {self._df_last[indicator].values[0]}")
             Logger.debug(f"last_action: {self.state.last_action}")
 
             return True
 
         # criteria for buy signal 2 (optionally add additional buy singals)
-        elif (
-            bool(self._df_last["ema12gtema26co"].values[0]) is True
-            and bool(self._df_last["macdgtsignalco"].values[0]) is True
-            and (
-                bool(self._df_last["goldencross"].values[0]) is True
-                or self.app.disableBullOnly()
-            )
-            and (
-                float(self._df_last["obv_pc"].values[0]) > -5
-                or self.app.disableBuyOBV()
-            )
-            and (
-                bool(self._df_last["eri_buy"].values[0]) is True
-                or self.app.disableBuyElderRay()
-            )
-            and self.state.last_action != "BUY"
-        ):  # required for all strategies
+        elif (bool(self._df_last["ema12gtema26co"].values[0]) is True
+              and bool(self._df_last["macdgtsignalco"].values[0]) is True
+              and (bool(self._df_last["goldencross"].values[0]) is True
+                   or self.app.disableBullOnly())
+              and (float(self._df_last["obv_pc"].values[0]) > -5
+                   or self.app.disableBuyOBV())
+              and (bool(self._df_last["eri_buy"].values[0]) is True
+                   or self.app.disableBuyElderRay()) and
+              self.state.last_action != "BUY"):  # required for all strategies
 
             Logger.debug("*** Buy Signal ***")
             for indicator in required_indicators:
-                Logger.debug(f"{indicator}: {self._df_last[indicator].values[0]}")
+                Logger.debug(
+                    f"{indicator}: {self._df_last[indicator].values[0]}")
             Logger.debug(f"last_action: {self.state.last_action}")
 
             return True
@@ -133,18 +109,15 @@ class Strategy:
                 raise AttributeError(f"'{indicator}' not in Pandas dataframe")
 
         # criteria for a sell signal 1
-        if (
-            bool(self._df_last["ema12ltema26co"].values[0]) is True
-            and (
-                bool(self._df_last["macdltsignal"].values[0]) is True
-                or self.app.disableBuyMACD()
-            )
-            and self.state.last_action not in ["", "SELL"]
-        ):
+        if (bool(self._df_last["ema12ltema26co"].values[0]) is True
+                and (bool(self._df_last["macdltsignal"].values[0]) is True
+                     or self.app.disableBuyMACD())
+                and self.state.last_action not in ["", "SELL"]):
 
             Logger.debug("*** Sell Signal ***")
             for indicator in required_indicators:
-                Logger.debug(f"{indicator}: {self._df_last[indicator].values[0]}")
+                Logger.debug(
+                    f"{indicator}: {self._df_last[indicator].values[0]}")
             Logger.debug(f"last_action: {self.state.last_action}")
 
             return True
@@ -161,134 +134,82 @@ class Strategy:
         macdltsignal: bool = False,
     ) -> bool:
         # loss failsafe sell at fibonacci band
-        if (
-            self.app.disableFailsafeFibonacciLow() is False
-            and self.app.allowSellAtLoss()
-            and self.app.sellLowerPcnt() is None
-            and self.state.fib_low > 0
-            and self.state.fib_low >= float(price)
-        ):
-            log_text = (
-                "! Loss Failsafe Triggered (Fibonacci Band: "
-                + str(self.state.fib_low)
-                + ")"
-            )
+        if (self.app.disableFailsafeFibonacciLow() is False
+                and self.app.allowSellAtLoss()
+                and self.app.sellLowerPcnt() is None and self.state.fib_low > 0
+                and self.state.fib_low >= float(price)):
+            log_text = ("! Loss Failsafe Triggered (Fibonacci Band: " +
+                        str(self.state.fib_low) + ")")
             Logger.warning(log_text)
-            self.app.notifyTelegram(
-                self.app.getMarket()
-                + " ("
-                + self.app.printGranularity()
-                + ") "
-                + log_text
-            )
+            self.app.notifyTelegram(self.app.getMarket() + " (" +
+                                    self.app.printGranularity() + ") " +
+                                    log_text)
             return True
 
         # loss failsafe sell at trailing_stop_loss
-        if (
-            self.app.trailingStopLoss() is not None
-            and change_pcnt_high < self.app.trailingStopLoss()
-            and (self.app.allowSellAtLoss() or margin > 0)
-        ):
-            log_text = (
-                "! Trailing Stop Loss Triggered (< "
-                + str(self.app.trailingStopLoss())
-                + "%)"
-            )
+        if (self.app.trailingStopLoss() is not None
+                and change_pcnt_high < self.app.trailingStopLoss()
+                and (self.app.allowSellAtLoss() or margin > 0)):
+            log_text = ("! Trailing Stop Loss Triggered (< " +
+                        str(self.app.trailingStopLoss()) + "%)")
             Logger.warning(log_text)
-            self.app.notifyTelegram(
-                self.app.getMarket()
-                + " ("
-                + self.app.printGranularity()
-                + ") "
-                + log_text
-            )
+            self.app.notifyTelegram(self.app.getMarket() + " (" +
+                                    self.app.printGranularity() + ") " +
+                                    log_text)
             return True
 
         # loss failsafe sell at sell_lower_pcnt
-        elif (
-            self.app.disableFailsafeLowerPcnt() is False
-            and self.app.allowSellAtLoss()
-            and self.app.sellLowerPcnt() is not None
-            and margin < self.app.sellLowerPcnt()
-        ):
-            log_text = (
-                "! Loss Failsafe Triggered (< " + str(self.app.sellLowerPcnt()) + "%)"
-            )
+        elif (self.app.disableFailsafeLowerPcnt() is False
+              and self.app.allowSellAtLoss()
+              and self.app.sellLowerPcnt() is not None
+              and margin < self.app.sellLowerPcnt()):
+            log_text = ("! Loss Failsafe Triggered (< " +
+                        str(self.app.sellLowerPcnt()) + "%)")
             Logger.warning(log_text)
-            self.app.notifyTelegram(
-                self.app.getMarket()
-                + " ("
-                + self.app.printGranularity()
-                + ") "
-                + log_text
-            )
+            self.app.notifyTelegram(self.app.getMarket() + " (" +
+                                    self.app.printGranularity() + ") " +
+                                    log_text)
             return True
 
         # profit bank at sell_upper_pcnt
-        if (
-            self.app.disableProfitbankUpperPcnt() is False
-            and self.app.sellUpperPcnt() is not None
-            and margin > self.app.sellUpperPcnt()
-        ):
-            log_text = (
-                "! Profit Bank Triggered (> " + str(self.app.sellUpperPcnt()) + "%)"
-            )
+        if (self.app.disableProfitbankUpperPcnt() is False
+                and self.app.sellUpperPcnt() is not None
+                and margin > self.app.sellUpperPcnt()):
+            log_text = ("! Profit Bank Triggered (> " +
+                        str(self.app.sellUpperPcnt()) + "%)")
             Logger.warning(log_text)
-            self.app.notifyTelegram(
-                self.app.getMarket()
-                + " ("
-                + self.app.printGranularity()
-                + ") "
-                + log_text
-            )
+            self.app.notifyTelegram(self.app.getMarket() + " (" +
+                                    self.app.printGranularity() + ") " +
+                                    log_text)
             return True
 
         # profit bank when strong reversal detected
-        if (
-            self.app.disableProfitbankReversal() is False
-            and margin > 3
-            and obv_pc < 0
-            and macdltsignal is True
-        ):
+        if (self.app.disableProfitbankReversal() is False and margin > 3
+                and obv_pc < 0 and macdltsignal is True):
             log_text = "! Profit Bank Triggered (Strong Reversal Detected)"
             Logger.warning(log_text)
-            self.app.notifyTelegram(
-                self.app.getMarket()
-                + " ("
-                + self.app.printGranularity()
-                + ") "
-                + log_text
-            )
+            self.app.notifyTelegram(self.app.getMarket() + " (" +
+                                    self.app.printGranularity() + ") " +
+                                    log_text)
             return True
 
         # profit bank when strong reversal detected
-        if (
-            self.app.sellAtResistance() is True
-            and margin >= 2
-            and price > 0
-            and price != price_exit
-        ):
+        if (self.app.sellAtResistance() is True and margin >= 2 and price > 0
+                and price != price_exit):
             log_text = "! Profit Bank Triggered (Selling At Resistance)"
             Logger.warning(log_text)
             if not (not self.app.allowSellAtLoss() and margin <= 0):
-                self.app.notifyTelegram(
-                    self.app.getMarket()
-                    + " ("
-                    + self.app.printGranularity()
-                    + ") "
-                    + log_text
-                )
+                self.app.notifyTelegram(self.app.getMarket() + " (" +
+                                        self.app.printGranularity() + ") " +
+                                        log_text)
             return True
 
         return False
 
     def isWaitTrigger(self, margin: float = 0.0):
         # configuration specifies to not sell at a loss
-        if (
-            self.state.action == "SELL"
-            and not self.app.allowSellAtLoss()
-            and margin <= 0
-        ):
+        if (self.state.action == "SELL" and not self.app.allowSellAtLoss()
+                and margin <= 0):
             log_text = "! Ignore Sell Signal (No Sell At Loss)"
             Logger.warning(log_text)
             return True

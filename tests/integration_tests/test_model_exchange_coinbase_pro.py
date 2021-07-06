@@ -32,11 +32,9 @@ def get_api_settings(filename):
         api_passphrase = config["api_pass"]
         api_url = config["api_url"]
 
-    elif (
-        "api_key" in config["coinbasepro"]
-        and "api_passphrase" in config["coinbasepro"]
-        and "api_url" in config["coinbasepro"]
-    ):
+    elif ("api_key" in config["coinbasepro"]
+          and "api_passphrase" in config["coinbasepro"]
+          and "api_url" in config["coinbasepro"]):
         api_key = config["coinbasepro"]["api_key"]
         api_secret = keyring.get_password("pycryptobot", api_key)
         api_passphrase = config["coinbasepro"]["api_passphrase"]
@@ -50,11 +48,9 @@ def getValidOrderMarket() -> str:
     with open(filename) as config_file:
         config = json.load(config_file)
 
-        if (
-            "api_key" in config
-            and ("api_pass" in config or "api_passphrase" in config)
-            and "api_url" in config
-        ):
+        if ("api_key" in config
+                and ("api_pass" in config or "api_passphrase" in config)
+                and "api_url" in config):
             api_key = config["api_key"]
             api_secret = keyring.get_password("pycryptobot", api_key)
             if "api_pass" in config:
@@ -63,11 +59,9 @@ def getValidOrderMarket() -> str:
                 api_passphrase = config["api_passphrase"]
             api_url = config["api_url"]
         elif "coinbasepro" in config:
-            if (
-                "api_key" in config["coinbasepro"]
-                and "api_passphrase" in config["coinbasepro"]
-                and "api_url" in config["coinbasepro"]
-            ):
+            if ("api_key" in config["coinbasepro"]
+                    and "api_passphrase" in config["coinbasepro"]
+                    and "api_url" in config["coinbasepro"]):
                 api_key = config["coinbasepro"]["api_key"]
                 api_secret = keyring.get_password("pycryptobot", api_key)
                 api_passphrase = config["coinbasepro"]["api_passphrase"]

@@ -15,9 +15,14 @@ def isMarketValid(market) -> bool:
 
 
 def to_internal_granularity(granularity: str) -> int:
-    return {"1m": 60, "5m": 300, "15m": 900, "1h": 3600, "6h": 21600, "1d": 86400}[
-        granularity
-    ]
+    return {
+        "1m": 60,
+        "5m": 300,
+        "15m": 900,
+        "1h": 3600,
+        "6h": 21600,
+        "1d": 86400
+    }[granularity]
 
 
 def parseMarket(market):
@@ -91,7 +96,8 @@ def parser(app, binance_config, args=None):
             binance_config["api_key"] = key
             binance_config["api_secret"] = secret
         except:
-            raise RuntimeError("Unable to read " + binance_config["api_key_file"])
+            raise RuntimeError("Unable to read " +
+                               binance_config["api_key_file"])
 
     if "api_key" not in binance_config or "api_url" not in binance_config:
         raise Exception("There is an error in your config dictionary")
@@ -141,17 +147,13 @@ def parser(app, binance_config, args=None):
 
     if "market" in config and config["market"] is not None:
         app.market, app.base_currency, app.quote_currency = parseMarket(
-            config["market"]
-        )
+            config["market"])
 
     if app.base_currency != "" and app.quote_currency != "":
         app.market = app.base_currency + app.quote_currency
 
-    if (
-        "granularity" in config
-        and config["granularity"] is not None
-        and isinstance(config["granularity"], str)
-        and config["granularity"] in ["1m", "5m", "15m", "1h", "6h", "1d"]
-    ):
+    if ("granularity" in config and config["granularity"] is not None
+            and isinstance(config["granularity"], str) and
+            config["granularity"] in ["1m", "5m", "15m", "1h", "6h", "1d"]):
         app.granularity = to_internal_granularity(config["granularity"])
         app.smart_switch = 0

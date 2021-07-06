@@ -57,7 +57,9 @@ class AuthAPI(AuthAPIBase):
         self.debug = False
         self.die_on_api_error = False
 
-        valid_urls = ["https://api.pro.coinbase.com", "https://api.pro.coinbase.com/"]
+        valid_urls = [
+            "https://api.pro.coinbase.com", "https://api.pro.coinbase.com/"
+        ]
 
         # validate Coinbase Pro API
         if api_url not in valid_urls:
@@ -102,15 +104,13 @@ class AuthAPI(AuthAPIBase):
         signature = hmac.new(hmac_key, message.encode(), hashlib.sha256)
         signature_b64 = base64.b64encode(signature.digest()).decode()
 
-        request.headers.update(
-            {
-                "CB-ACCESS-SIGN": signature_b64,
-                "CB-ACCESS-TIMESTAMP": timestamp,
-                "CB-ACCESS-KEY": self._api_key,
-                "CB-ACCESS-PASSPHRASE": self._api_passphrase,
-                "Content-Type": "application/json",
-            }
-        )
+        request.headers.update({
+            "CB-ACCESS-SIGN": signature_b64,
+            "CB-ACCESS-TIMESTAMP": timestamp,
+            "CB-ACCESS-KEY": self._api_key,
+            "CB-ACCESS-PASSPHRASE": self._api_passphrase,
+            "Content-Type": "application/json",
+        })
         return request
 
     def getAccounts(self) -> pd.DataFrame:
@@ -155,7 +155,8 @@ class AuthAPI(AuthAPIBase):
         return float(fees["maker_fee_rate"].to_string(index=False).strip())
 
     def getTakerFee(self, market: str = "") -> float:
-        fees = self.getFees(market) if len(market) is not None else self.getFees()
+        fees = self.getFees(market) if len(
+            market) is not None else self.getFees()
         if len(fees) == 0 or "taker_fee_rate" not in fees:
             Logger.error(
                 f"error: 'taker_fee_rate' not in fees (using {DEFAULT_TAKER_FEE_RATE} as a fallback)"
@@ -168,9 +169,10 @@ class AuthAPI(AuthAPIBase):
         fees = self.getFees()
         return float(fees["usd_volume"].to_string(index=False).strip())
 
-    def getOrders(
-        self, market: str = "", action: str = "", status: str = "all"
-    ) -> pd.DataFrame:
+    def getOrders(self,
+                  market: str = "",
+                  action: str = "",
+                  status: str = "all") -> pd.DataFrame:
         """Retrieves your list of orders with optional filtering"""
 
         # if market provided
@@ -193,52 +195,45 @@ class AuthAPI(AuthAPIBase):
         resp = self.authAPI("GET", f"orders?status={status}")
         if len(resp) > 0:
             if status == "open":
-                df = resp.copy()[
-                    [
+                df = resp.copy()[[
+                    "created_at",
+                    "product_id",
+                    "side",
+                    "type",
+                    "size",
+                    "price",
+                    "status",
+                ]]
+                df["value"] = float(df["price"]) * float(df["size"]) - (
+                    float(df["price"]) * MARGIN_ADJUSTMENT)
+            else:
+                if "specified_funds" in resp:
+                    df = resp.copy()[[
                         "created_at",
                         "product_id",
                         "side",
                         "type",
-                        "size",
-                        "price",
+                        "filled_size",
+                        "specified_funds",
+                        "executed_value",
+                        "fill_fees",
                         "status",
-                    ]
-                ]
-                df["value"] = float(df["price"]) * float(df["size"]) - (
-                    float(df["price"]) * MARGIN_ADJUSTMENT
-                )
-            else:
-                if "specified_funds" in resp:
-                    df = resp.copy()[
-                        [
-                            "created_at",
-                            "product_id",
-                            "side",
-                            "type",
-                            "filled_size",
-                            "specified_funds",
-                            "executed_value",
-                            "fill_fees",
-                            "status",
-                        ]
-                    ]
+                    ]]
                 else:
                     # manual limit orders do not contain 'specified_funds'
                     df_tmp = resp.copy()
                     df_tmp["specified_funds"] = None
-                    df = df_tmp[
-                        [
-                            "created_at",
-                            "product_id",
-                            "side",
-                            "type",
-                            "filled_size",
-                            "specified_funds",
-                            "executed_value",
-                            "fill_fees",
-                            "status",
-                        ]
-                    ]
+                    df = df_tmp[[
+                        "created_at",
+                        "product_id",
+                        "side",
+                        "type",
+                        "filled_size",
+                        "specified_funds",
+                        "executed_value",
+                        "fill_fees",
+                        "status",
+                    ]]
         else:
             return pd.DataFrame()
 
@@ -256,10 +251,9 @@ class AuthAPI(AuthAPIBase):
         # calculates the price at the time of purchase
         if status != "open":
             df["price"] = df.copy().apply(
-                lambda row: (float(row.executed_value) * 100)
-                / (float(row.filled_size) * 100)
-                if float(row.filled_size) > 0
-                else 0,
+                lambda row: (float(row.executed_value) * 100) /
+                (float(row.filled_size) * 100)
+                if float(row.filled_size) > 0 else 0,
                 axis=1,
             )
             # df.loc[df['filled_size'] > 0, 'price'] = (df['executed_value'] * 100) / (df['filled_size'] * 100)
@@ -276,18 +270,16 @@ class AuthAPI(AuthAPIBase):
                 "status",
                 "value",
             ]
-            df = df[
-                [
-                    "created_at",
-                    "market",
-                    "action",
-                    "type",
-                    "size",
-                    "value",
-                    "status",
-                    "price",
-                ]
-            ]
+            df = df[[
+                "created_at",
+                "market",
+                "action",
+                "type",
+                "size",
+                "value",
+                "status",
+                "price",
+            ]]
             df["size"] = df["size"].astype(float).round(8)
         else:
             df.columns = [
@@ -302,19 +294,17 @@ class AuthAPI(AuthAPIBase):
                 "status",
                 "price",
             ]
-            df = df[
-                [
-                    "created_at",
-                    "market",
-                    "action",
-                    "type",
-                    "size",
-                    "value",
-                    "fees",
-                    "price",
-                    "status",
-                ]
-            ]
+            df = df[[
+                "created_at",
+                "market",
+                "action",
+                "type",
+                "size",
+                "value",
+                "fees",
+                "price",
+                "status",
+            ]]
             df.columns = [
                 "created_at",
                 "market",
@@ -335,8 +325,8 @@ class AuthAPI(AuthAPIBase):
 
         # convert dataframe to a time series
         tsidx = pd.DatetimeIndex(
-            pd.to_datetime(df["created_at"]).dt.strftime("%Y-%m-%dT%H:%M:%S.%Z")
-        )
+            pd.to_datetime(
+                df["created_at"]).dt.strftime("%Y-%m-%dT%H:%M:%S.%Z"))
         df.set_index(tsidx, inplace=True)
         df = df.drop(columns=["created_at"])
 
@@ -373,7 +363,9 @@ class AuthAPI(AuthAPIBase):
         except:
             return None
 
-    def marketBuy(self, market: str = "", quote_quantity: float = 0) -> pd.DataFrame:
+    def marketBuy(self,
+                  market: str = "",
+                  quote_quantity: float = 0) -> pd.DataFrame:
         """Executes a market buy providing a funding amount"""
 
         # validates the market is syntactically correct
@@ -382,19 +374,16 @@ class AuthAPI(AuthAPIBase):
 
         # validates quote_quantity is either an integer or float
         if not isinstance(quote_quantity, int) and not isinstance(
-            quote_quantity, float
-        ):
-            Logger.critical(
-                "Please report this to Michael Whittle: "
-                + str(quote_quantity)
-                + " "
-                + str(type(quote_quantity))
-            )
+                quote_quantity, float):
+            Logger.critical("Please report this to Michael Whittle: " +
+                            str(quote_quantity) + " " +
+                            str(type(quote_quantity)))
             raise TypeError("The funding amount is not numeric.")
 
         # funding amount needs to be greater than 10
         if quote_quantity < MINIMUM_TRADE_AMOUNT:
-            raise ValueError(f"Trade amount is too small (>= {MINIMUM_TRADE_AMOUNT}).")
+            raise ValueError(
+                f"Trade amount is too small (>= {MINIMUM_TRADE_AMOUNT}).")
 
         order = {
             "product_id": market,
@@ -406,18 +395,20 @@ class AuthAPI(AuthAPIBase):
         Logger.debug(order)
 
         # connect to authenticated coinbase pro api
-        model = AuthAPI(
-            self._api_key, self._api_secret, self._api_passphrase, self._api_url
-        )
+        model = AuthAPI(self._api_key, self._api_secret, self._api_passphrase,
+                        self._api_url)
 
         # place order and return result
         return model.authAPI("POST", "orders", order)
 
-    def marketSell(self, market: str = "", base_quantity: float = 0) -> pd.DataFrame:
+    def marketSell(self,
+                   market: str = "",
+                   base_quantity: float = 0) -> pd.DataFrame:
         if not self._isMarketValid(market):
             raise ValueError("Coinbase Pro market is invalid.")
 
-        if not isinstance(base_quantity, int) and not isinstance(base_quantity, float):
+        if not isinstance(base_quantity, int) and not isinstance(
+                base_quantity, float):
             raise TypeError("The crypto amount is not numeric.")
 
         order = {
@@ -429,21 +420,23 @@ class AuthAPI(AuthAPIBase):
 
         Logger.debug(order)
 
-        model = AuthAPI(
-            self._api_key, self._api_secret, self._api_passphrase, self._api_url
-        )
+        model = AuthAPI(self._api_key, self._api_secret, self._api_passphrase,
+                        self._api_url)
         return model.authAPI("POST", "orders", order)
 
-    def limitSell(
-        self, market: str = "", base_quantity: float = 0, future_price: float = 0
-    ) -> pd.DataFrame:
+    def limitSell(self,
+                  market: str = "",
+                  base_quantity: float = 0,
+                  future_price: float = 0) -> pd.DataFrame:
         if not self._isMarketValid(market):
             raise ValueError("Coinbase Pro market is invalid.")
 
-        if not isinstance(base_quantity, int) and not isinstance(base_quantity, float):
+        if not isinstance(base_quantity, int) and not isinstance(
+                base_quantity, float):
             raise TypeError("The crypto amount is not numeric.")
 
-        if not isinstance(future_price, int) and not isinstance(future_price, float):
+        if not isinstance(future_price, int) and not isinstance(
+                future_price, float):
             raise TypeError("The future crypto price is not numeric.")
 
         order = {
@@ -456,18 +449,16 @@ class AuthAPI(AuthAPIBase):
 
         Logger.debug(order)
 
-        model = AuthAPI(
-            self._api_key, self._api_secret, self._api_passphrase, self._api_url
-        )
+        model = AuthAPI(self._api_key, self._api_secret, self._api_passphrase,
+                        self._api_url)
         return model.authAPI("POST", "orders", order)
 
     def cancelOrders(self, market: str = "") -> pd.DataFrame:
         if not self._isMarketValid(market):
             raise ValueError("Coinbase Pro market is invalid.")
 
-        model = AuthAPI(
-            self._api_key, self._api_secret, self._api_passphrase, self._api_url
-        )
+        model = AuthAPI(self._api_key, self._api_secret, self._api_passphrase,
+                        self._api_url)
         return model.authAPI("DELETE", "orders")
 
     def marketBaseIncrement(self, market, amount) -> float:
@@ -483,7 +474,7 @@ class AuthAPI(AuthAPIBase):
         else:
             nb_digits = 0
 
-        return floor(amount * 10 ** nb_digits) / 10 ** nb_digits
+        return floor(amount * 10**nb_digits) / 10**nb_digits
 
     def marketQuoteIncrement(self, market, amount) -> float:
         product = self.authAPI("GET", f"products/{market}")
@@ -498,9 +489,12 @@ class AuthAPI(AuthAPIBase):
         else:
             nb_digits = 0
 
-        return floor(amount * 10 ** nb_digits) / 10 ** nb_digits
+        return floor(amount * 10**nb_digits) / 10**nb_digits
 
-    def authAPI(self, method: str, uri: str, payload: str = "") -> pd.DataFrame:
+    def authAPI(self,
+                method: str,
+                uri: str,
+                payload: str = "") -> pd.DataFrame:
         if not isinstance(method, str):
             raise TypeError("Method is not a string.")
 
@@ -516,35 +510,24 @@ class AuthAPI(AuthAPIBase):
             elif method == "GET":
                 resp = requests.get(self._api_url + uri, auth=self)
             elif method == "POST":
-                resp = requests.post(self._api_url + uri, json=payload, auth=self)
+                resp = requests.post(self._api_url + uri,
+                                     json=payload,
+                                     auth=self)
 
             if resp.status_code != 200:
                 if self.die_on_api_error or resp.status_code == 401:
                     # disable traceback
                     sys.tracebacklimit = 0
 
-                    raise Exception(
-                        method.upper()
-                        + " ("
-                        + "{}".format(resp.status_code)
-                        + ") "
-                        + self._api_url
-                        + uri
-                        + " - "
-                        + "{}".format(resp.json()["message"])
-                    )
+                    raise Exception(method.upper() + " (" +
+                                    "{}".format(resp.status_code) + ") " +
+                                    self._api_url + uri + " - " +
+                                    "{}".format(resp.json()["message"]))
                 else:
-                    Logger.error(
-                        "error: "
-                        + method.upper()
-                        + " ("
-                        + "{}".format(resp.status_code)
-                        + ") "
-                        + self._api_url
-                        + uri
-                        + " - "
-                        + "{}".format(resp.json()["message"])
-                    )
+                    Logger.error("error: " + method.upper() + " (" +
+                                 "{}".format(resp.status_code) + ") " +
+                                 self._api_url + uri + " - " +
+                                 "{}".format(resp.json()["message"]))
                     return pd.DataFrame()
 
             resp.raise_for_status()
@@ -607,9 +590,8 @@ class PublicAPI(AuthAPIBase):
 
         # validates the granularity is supported by Coinbase Pro
         if granularity not in SUPPORTED_GRANULARITY:
-            raise TypeError(
-                "Granularity options: " + ", ".join(map(str, SUPPORTED_GRANULARITY))
-            )
+            raise TypeError("Granularity options: " +
+                            ", ".join(map(str, SUPPORTED_GRANULARITY)))
 
         # validates the ISO 8601 start date is a string (if provided)
         if not isinstance(iso8601start, str):
@@ -631,34 +613,32 @@ class PublicAPI(AuthAPIBase):
             )
         else:
             resp = self.authAPI(
-                "GET", f"products/{market}/candles?granularity={granularity}"
-            )
+                "GET", f"products/{market}/candles?granularity={granularity}")
 
         # convert the API response into a Pandas DataFrame
         df = pd.DataFrame(
-            resp, columns=["epoch", "low", "high", "open", "close", "volume"]
-        )
+            resp, columns=["epoch", "low", "high", "open", "close", "volume"])
         # reverse the order of the response with earliest last
         df = df.iloc[::-1].reset_index()
 
         try:
-            freq = FREQUENCY_EQUIVALENTS[SUPPORTED_GRANULARITY.index(granularity)]
+            freq = FREQUENCY_EQUIVALENTS[SUPPORTED_GRANULARITY.index(
+                granularity)]
         except:
             freq = "D"
 
         # convert the DataFrame into a time series with the date as the index/key
         try:
-            tsidx = pd.DatetimeIndex(
-                pd.to_datetime(df["epoch"], unit="s"), dtype="datetime64[ns]", freq=freq
-            )
+            tsidx = pd.DatetimeIndex(pd.to_datetime(df["epoch"], unit="s"),
+                                     dtype="datetime64[ns]",
+                                     freq=freq)
             df.set_index(tsidx, inplace=True)
             df = df.drop(columns=["epoch", "index"])
             df.index.names = ["ts"]
             df["date"] = tsidx
         except ValueError:
-            tsidx = pd.DatetimeIndex(
-                pd.to_datetime(df["epoch"], unit="s"), dtype="datetime64[ns]"
-            )
+            tsidx = pd.DatetimeIndex(pd.to_datetime(df["epoch"], unit="s"),
+                                     dtype="datetime64[ns]")
             df.set_index(tsidx, inplace=True)
             df = df.drop(columns=["epoch", "index"])
             df.index.names = ["ts"]
@@ -668,9 +648,10 @@ class PublicAPI(AuthAPIBase):
         df["granularity"] = granularity
 
         # re-order columns
-        df = df[
-            ["date", "market", "granularity", "low", "high", "open", "close", "volume"]
-        ]
+        df = df[[
+            "date", "market", "granularity", "low", "high", "open", "close",
+            "volume"
+        ]]
 
         return df
 
@@ -683,9 +664,9 @@ class PublicAPI(AuthAPIBase):
 
         if "time" in resp and "price" in resp:
             return (
-                datetime.strptime(resp["time"], "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                ),
+                datetime.strptime(
+                    resp["time"],
+                    "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%Y-%m-%d %H:%M:%S"),
                 float(resp["price"]),
             )
 
