@@ -1,5 +1,5 @@
 import re
-import sys
+
 
 def merge_config_and_args(exchange_config, args):
     new_config = {}
@@ -10,9 +10,11 @@ def merge_config_and_args(exchange_config, args):
             new_config[key] = value
     return new_config
 
+
 def isCurrencyValid(currency):
     p = re.compile(r"^[1-9A-Z]{2,5}$")
     return p.match(currency)
+
 
 def defaultConfigParse(app, config):
     if 'live' in config:
@@ -114,20 +116,20 @@ def defaultConfigParse(app, config):
                 app.autorestart = bool(config['autorestart'])
         else:
             raise TypeError('autorestart must be of type int')
-    
+
     if 'stats' in config:
         if isinstance(config['stats'], int):
             if bool(config['stats']):
                 app.stats = True
                 if 'statgroup' in config:
                     app.statgroup = config['statgroup']
-                if 'statstartdate' in config:    
+                if 'statstartdate' in config:
                     app.statstartdate = config['statstartdate']
                 if 'statdetail' in config:
                     app.statdetail = config['statdetail']
         else:
             raise TypeError('stats must be of type int')
-    
+
     if 'sellatloss' in config:
         if isinstance(config['sellatloss'], int):
             if config['sellatloss'] in [ 0, 1 ]:

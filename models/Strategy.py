@@ -98,21 +98,21 @@ class Strategy():
             return True
 
         # loss failsafe sell at trailing_stop_loss
-        if self.app.trailingStopLoss() != None and change_pcnt_high < self.app.trailingStopLoss() and (self.app.allowSellAtLoss() or margin > 0):
+        if self.app.trailingStopLoss() is not None and change_pcnt_high < self.app.trailingStopLoss() and (self.app.allowSellAtLoss() or margin > 0):
             log_text = '! Trailing Stop Loss Triggered (< ' + str(self.app.trailingStopLoss()) + '%)'
             Logger.warning(log_text)
             self.app.notifyTelegram(self.app.getMarket() + ' (' + self.app.printGranularity() + ') ' + log_text)
             return True
 
         # loss failsafe sell at sell_lower_pcnt
-        elif self.app.disableFailsafeLowerPcnt() is False and self.app.allowSellAtLoss() and self.app.sellLowerPcnt() != None and margin < self.app.sellLowerPcnt():
+        elif self.app.disableFailsafeLowerPcnt() is False and self.app.allowSellAtLoss() and self.app.sellLowerPcnt() is not None and margin < self.app.sellLowerPcnt():
             log_text = '! Loss Failsafe Triggered (< ' + str(self.app.sellLowerPcnt()) + '%)'
             Logger.warning(log_text)
             self.app.notifyTelegram(self.app.getMarket() + ' (' + self.app.printGranularity() + ') ' + log_text)
             return True
 
         # profit bank at sell_upper_pcnt
-        if self.app.disableProfitbankUpperPcnt() is False and self.app.sellUpperPcnt() != None and margin > self.app.sellUpperPcnt():
+        if self.app.disableProfitbankUpperPcnt() is False and self.app.sellUpperPcnt() is not None and margin > self.app.sellUpperPcnt():
             log_text = '! Profit Bank Triggered (> ' + str(self.app.sellUpperPcnt()) + '%)'
             Logger.warning(log_text)
             self.app.notifyTelegram(self.app.getMarket() + ' (' + self.app.printGranularity() + ') ' + log_text)

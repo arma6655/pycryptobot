@@ -1,4 +1,3 @@
-import pandas as pd
 import argparse
 import json
 import math
@@ -6,16 +5,21 @@ import os
 import random
 import re
 import sys
-import urllib3
 from datetime import datetime, timedelta
 from typing import Union
+
+import keyring
+import pandas as pd
+import urllib3
 from urllib3.exceptions import ReadTimeoutError
+
+from models.ConfigBuilder import ConfigBuilder
 from models.Trading import TechnicalAnalysis
+from models.chat import Telegram
+from models.config import binanceConfigParser, binanceParseMarket, coinbaseProConfigParser, \
+    coinbaseProParseMarket, dummyConfigParser, loggerConfigParser
 from models.exchange.binance import AuthAPI as BAuthAPI, PublicAPI as BPublicAPI
 from models.exchange.coinbase_pro import AuthAPI as CBAuthAPI, PublicAPI as CBPublicAPI
-from models.chat import Telegram
-from models.config import binanceConfigParser, binanceParseMarket, coinbaseProConfigParser, coinbaseProParseMarket, dummyConfigParser, dummyParseMarket, loggerConfigParser
-from models.ConfigBuilder import ConfigBuilder
 from models.helper.LogHelper import Logger
 
 # disable insecure ssl warning
@@ -219,20 +223,21 @@ class PyCryptoBot():
                 elif self.exchange == 'dummy' and 'dummy' in config:
                     dummyConfigParser(self, config['dummy'], args)
 
-                if not self.disabletelegram and 'telegram' in config and 'token' in config['telegram'] and 'client_id' in config['telegram']:
-                    telegram = config['telegram']
-                    self._chat_client = Telegram(telegram['token'], telegram['client_id'])
+                if not self.disabletelegram and 'telegram' in config and 'client_id' in config['telegram']:
+                    client_id = config['telegram']['client_id']
+                    token = keyring.get_password("pycryptobot", client_id)
+                    self._chat_client = Telegram(token, client_id)
                     self.telegram = True
 
                 if 'logger' in config:
                     loggerConfigParser(self, config['logger'])
-                
+
                 if self.disablelog:
                     self.filelog = 0
                     self.fileloglevel = 'NOTSET'
                     self.logfile == "pycryptobot.log"
 
-                Logger.configure(filelog=self.filelog, logfile=self.logfile, fileloglevel=self.fileloglevel, consolelog=self.consolelog, consoleloglevel=self.consoleloglevel)     
+                Logger.configure(filelog=self.filelog, logfile=self.logfile, fileloglevel=self.fileloglevel, consolelog=self.consolelog, consoleloglevel=self.consoleloglevel)
 
         except json.decoder.JSONDecodeError as err:
             sys.tracebacklimit = 0
@@ -247,7 +252,7 @@ class PyCryptoBot():
             raise ValueError('Invalid config.json: ' + str(err))
 
     def _isCurrencyValid(self, currency):
-        if self.exchange == 'coinbasepro' or self.exchange == 'binance':
+        if self.exchange in ['coinbasepro', 'binance']:
             p = re.compile(r"^[1-9A-Z]{2,5}$")
             return p.match(currency)
 
@@ -309,7 +314,7 @@ class PyCryptoBot():
                         line = line.replace(' (pycryptobot)', '')
                         return line.strip()
 
-                    count = count + 1
+                    count += 1
 
             return 'v0.0.0'
         except Exception:
@@ -396,7 +401,7 @@ class PyCryptoBot():
 
         if 'date'in result_df:
             result_df.sort_values(by=['date'], ascending=True, inplace=True)
-        
+
         return result_df
 
     def getSmartSwitch(self):
@@ -432,15 +437,15 @@ class PyCryptoBot():
                 Logger.debug("simdate: " + str(df_last['date']))
                 Logger.debug("ema12 1h: " + str(df_last['ema12']))
                 Logger.debug("ema26 1h: " + str(df_last['ema26']))
-                
+
             Logger.debug("bull 1h: " + str(df_last['ema12'] > df_last['ema26']))
 
-            df_last['bull'] = df_last['ema12'] > df_last['ema26']  
+            df_last['bull'] = df_last['ema12'] > df_last['ema26']
             return bool(df_last['bull'])
         except Exception:
             return False
 
-    def is1hSMA50200Bull(self, iso8601end: str=''):
+    def is1hSMA50200Bull(self, iso8601end: str = ''):
         try:
             if self.isSimulation() and isinstance(self.sma50200_1h_cache, pd.DataFrame):
                 df_data = self.sma50200_1h_cache[(self.sma50200_1h_cache['date'] <= iso8601end)]
@@ -456,10 +461,10 @@ class PyCryptoBot():
                 return False
 
             ta = TechnicalAnalysis(df_data)
-            
+
             if 'sma50' not in df_data:
                 ta.addSMA(50)
-            
+
             if 'sma200' not in df_data:
                 ta.addSMA(200)
 
@@ -470,7 +475,7 @@ class PyCryptoBot():
                 Logger.debug("simdate: " + str(df_last['date']))
                 Logger.debug("sma50 1h: " + str(df_last['sma50']))
                 Logger.debug("sma200 1h: " + str(df_last['sma200']))
-                
+
             Logger.debug("bull 1h: " + str(df_last['sma50'] > df_last['sma200']))
 
             df_last['bull'] = df_last['sma50'] > df_last['sma200']
@@ -502,7 +507,7 @@ class PyCryptoBot():
         except Exception:
             return False
 
-    def is6hEMA1226Bull(self, iso8601end: str=''):
+    def is6hEMA1226Bull(self, iso8601end: str = ''):
         try:
             if self.isSimulation() and isinstance(self.ema1226_6h_cache, pd.DataFrame):
                 df_data = self.ema1226_6h_cache[(self.ema1226_6h_cache['date'] <= iso8601end)]
@@ -533,9 +538,9 @@ class PyCryptoBot():
                 Logger.debug("simdate: " + str(df_last['date']))
                 Logger.debug("ema12 6h: " + str(df_last['ema12']))
                 Logger.debug("ema26 6h: " + str(df_last['ema26']))
-                
+
             Logger.debug("bull 6h: " + str(df_last['ema12'] > df_last['ema26']))
-                
+
             return bool(df_last['bull'])
         except Exception:
             return False
@@ -616,7 +621,7 @@ class PyCryptoBot():
 
     def autoRestart(self) -> bool:
         return self.autorestart
-    
+
     def getStats(self) -> bool:
         return self.stats
 
@@ -657,7 +662,7 @@ class PyCryptoBot():
         return self.disabletracker
 
     def setGranularity(self, granularity: int):
-        if granularity in [60, 300, 900, 3600, 21600, 86400]:
+        if granularity in {60, 300, 900, 3600, 21600, 86400}:
             self.granularity = granularity
 
 
@@ -694,13 +699,13 @@ class PyCryptoBot():
                     return None
 
                 return {
-                    'side' : 'buy',
-                    'market' : self.getMarket(),
-                    'size' : float(last_order['size']),
-                    'filled' : float(last_order['filled']),
-                    'price' : float(last_order['price']),
-                    'fee' : float(last_order['fees']),
-                    'date' : str(pd.DatetimeIndex(pd.to_datetime(last_order['created_at']).dt.strftime('%Y-%m-%dT%H:%M:%S.%Z'))[0])
+                    'side': 'buy',
+                    'market': self.getMarket(),
+                    'size': float(last_order['size']),
+                    'filled': float(last_order['filled']),
+                    'price': float(last_order['price']),
+                    'fee': float(last_order['fees']),
+                    'date': str(pd.DatetimeIndex(pd.to_datetime(last_order['created_at']).dt.strftime('%Y-%m-%dT%H:%M:%S.%Z'))[0])
                 }
             elif self.exchange == 'binance':
                 api = BAuthAPI(self.getAPIKey(), self.getAPISecret(), self.getAPIURL())
@@ -714,13 +719,13 @@ class PyCryptoBot():
                     return None
 
                 return {
-                    'side' : 'buy',
-                    'market' : self.getMarket(),
-                    'size' : float(last_order['size']),
-                    'filled' : float(last_order['filled']),
-                    'price' : float(last_order['price']),
-                    'fees' : float(last_order['size'] * 0.001),
-                    'date' : str(pd.DatetimeIndex(pd.to_datetime(last_order['created_at']).dt.strftime('%Y-%m-%dT%H:%M:%S.%Z'))[0])
+                    'side': 'buy',
+                    'market': self.getMarket(),
+                    'size': float(last_order['size']),
+                    'filled': float(last_order['filled']),
+                    'price': float(last_order['price']),
+                    'fees': float(last_order['size'] * 0.001),
+                    'date': str(pd.DatetimeIndex(pd.to_datetime(last_order['created_at']).dt.strftime('%Y-%m-%dT%H:%M:%S.%Z'))[0])
                 }
             else:
                 return None
@@ -729,9 +734,9 @@ class PyCryptoBot():
 
     def getTakerFee(self):
         if self.isSimulation() is True and self.exchange == 'coinbasepro':
-            return 0.005 # default lowest fee tier
+            return 0.005  # default lowest fee tier
         elif self.isSimulation() is True and self.exchange == 'binance':
-            return 0.001 # default lowest fee tier
+            return 0.001  # default lowest fee tier
         elif self.exchange == 'coinbasepro':
             api = CBAuthAPI(self.getAPIKey(), self.getAPISecret(), self.getAPIPassphrase(), self.getAPIURL())
             return api.getTakerFee()
@@ -766,6 +771,7 @@ class PyCryptoBot():
                 return api.marketBuy(market, quote_currency)
             else:
                 return None
+
 
     def marketSell(self, market, base_currency, sell_percent=100):
         if self.is_live == 1:
@@ -804,13 +810,13 @@ class PyCryptoBot():
             Logger.info('|                             Python Crypto Bot                                |')
             Logger.info('--------------------------------------------------------------------------------')
             txt = '              Release : ' + self.getVersionFromREADME()
-            Logger.info('|  ' +  txt + (' ' * (75 - len(txt))) + ' | ')
+            Logger.info('|  ' + txt + (' ' * (75 - len(txt))) + ' | ')
 
             Logger.info('-----------------------------------------------------------------------------')
 
             if self.isVerbose():
                 txt = '               Market : ' + self.getMarket()
-                Logger.info('|  ' +  txt + (' ' * (75 - len(txt))) + ' | ')
+                Logger.info('|  ' + txt + (' ' * (75 - len(txt))) + ' | ')
                 txt = '          Granularity : ' + str(self.getGranularity()) + ' seconds'
                 Logger.info('|  ' + txt + (' ' * (75 - len(txt))) + ' | ')
                 Logger.info('-----------------------------------------------------------------------------')
@@ -826,15 +832,15 @@ class PyCryptoBot():
             Logger.info('|  ' + txt + (' ' * (75 - len(txt))) + ' | ')
             Logger.info('================================================================================')
 
-            if self.sellUpperPcnt() != None:
+            if self.sellUpperPcnt() is not None:
                 txt = '           Sell Upper : ' + str(self.sellUpperPcnt()) + '%'
                 Logger.info('|  ' + txt + (' ' * (75 - len(txt))) + ' | ')
 
-            if self.sellLowerPcnt() != None:
+            if self.sellLowerPcnt() is not None:
                 txt = '           Sell Lower : ' + str(self.sellLowerPcnt()) + '%'
                 Logger.info('|  ' + txt + (' ' * (75 - len(txt))) + ' | ')
 
-            if self.trailingStopLoss() != None:
+            if self.trailingStopLoss() is not None:
                 txt = '   Trailing Stop Loss : ' + str(self.trailingStopLoss()) + '%'
                 Logger.info(' | ' + txt + (' ' * (75 - len(txt))) + ' | ')
 
@@ -863,12 +869,12 @@ class PyCryptoBot():
                 not self.disableFailsafeFibonacciLow()) + '  --disablefailsafefibonaccilow'
             Logger.info('|  ' + txt + (' ' * (75 - len(txt))) + ' | ')
 
-            if self.sellLowerPcnt() != None:
+            if self.sellLowerPcnt() is not None:
                 txt = '      Sell Lower Pcnt : ' + str(
                     not self.disableFailsafeLowerPcnt()) + '  --disablefailsafelowerpcnt'
                 Logger.info('|  ' + txt + (' ' * (75 - len(txt))) + ' | ')
 
-            if self.sellUpperPcnt() != None:
+            if self.sellUpperPcnt() is not None:
                 txt = '      Sell Upper Pcnt : ' + str(
                     not self.disableFailsafeLowerPcnt()) + '  --disableprofitbankupperpcnt'
                 Logger.info('|  ' + txt + (' ' * (75 - len(txt))) + ' | ')
@@ -955,7 +961,7 @@ class PyCryptoBot():
                     Logger.info(' | ' + txt + (' ' * (75 - len(txt))) + ' | ')
                     txt = '     Sampling end : ' + str(endDate)
                     Logger.info(' | ' + txt + (' ' * (75 - len(txt))) + ' | ')
-                    if self.simstartdate != None:
+                    if self.simstartdate is not None:
                         txt = '    WARNING: Using less than 300 intervals'
                         Logger.info(' | ' + txt + (' ' * (75 - len(txt))) + ' | ')
                         txt = '    Interval size : ' + str(len(tradingData))
