@@ -13,118 +13,143 @@ def isMarketValid(market) -> bool:
 
 
 def to_internal_granularity(granularity: str) -> int:
-    return {'1m': 60, '5m': 300, '15m': 900, '1h': 3600, '6h': 21600, '1d': 86400}[granularity]
+    return {"1m": 60, "5m": 300, "15m": 900, "1h": 3600, "6h": 21600, "1d": 86400}[
+        granularity
+    ]
 
 
 def parseMarket(market):
-    base_currency = 'BTC'
-    quote_currency = 'GBP'
+    base_currency = "BTC"
+    quote_currency = "GBP"
 
     if not isMarketValid(market):
-        raise ValueError('Binance market invalid: ' + market)
+        raise ValueError("Binance market invalid: " + market)
 
     quote_currencies = [
-        'BTC', 'BNB', 'ETH', 'USDT', 'TUSD', 'BUSD', 'DAX', 'NGN', 'RUB', 'TRY', 'EUR',
-        'GBP', 'ZAR', 'UAH', 'DAI', 'BIDR', 'AUD', 'US', 'NGN', 'BRL', 'BVND', 'VAI'
+        "BTC",
+        "BNB",
+        "ETH",
+        "USDT",
+        "TUSD",
+        "BUSD",
+        "DAX",
+        "NGN",
+        "RUB",
+        "TRY",
+        "EUR",
+        "GBP",
+        "ZAR",
+        "UAH",
+        "DAI",
+        "BIDR",
+        "AUD",
+        "US",
+        "NGN",
+        "BRL",
+        "BVND",
+        "VAI",
     ]
 
     for qc in quote_currencies:
         if market.endswith(qc):
-            base_currency = market.replace(qc, '')
+            base_currency = market.replace(qc, "")
             quote_currency = qc
             break
 
     if len(market) != len(base_currency) + len(quote_currency):
-        raise ValueError('Binance market error.')
+        raise ValueError("Binance market error.")
 
     return market, base_currency, quote_currency
 
 
 def parser(app, binance_config, args=None):
-    #print('Binance Configuration parse')
+    # print('Binance Configuration parse')
 
     if args is None:
         args = {}
     if not binance_config:
-        raise Exception('There is an error in your config dictionary')
+        raise Exception("There is an error in your config dictionary")
 
     if not app:
-        raise Exception('No app is passed')
+        raise Exception("No app is passed")
 
-    if 'api_key' in binance_config:
-        print('* "api_key / secret" should be saved in a separate file referred as "api_key_file"')
+    if "api_key" in binance_config:
         print(
-            '* the file should be a simple text file with key / secret on separate lines\n')
+            '* "api_key / secret" should be saved in a separate file referred as "api_key_file"'
+        )
+        print(
+            "* the file should be a simple text file with key / secret on separate lines\n"
+        )
 
-    if 'api_key_file' in binance_config:
+    if "api_key_file" in binance_config:
         try:
-            with open(binance_config['api_key_file'], 'r') as f:
+            with open(binance_config["api_key_file"], "r") as f:
                 key = f.readline().strip()
                 secret = f.readline().strip()
-            binance_config['api_key'] = key
-            binance_config['api_secret'] = secret
+            binance_config["api_key"] = key
+            binance_config["api_secret"] = secret
         except:
-            raise RuntimeError('Unable to read ' +
-                               binance_config['api_key_file'])
+            raise RuntimeError("Unable to read " + binance_config["api_key_file"])
 
-    if 'api_key' not in binance_config or 'api_url' not in binance_config:
-        raise Exception('There is an error in your config dictionary')
+    if "api_key" not in binance_config or "api_url" not in binance_config:
+        raise Exception("There is an error in your config dictionary")
     # validates the api key is syntactically correct
-    api_key = binance_config['api_key']
+    api_key = binance_config["api_key"]
     p = re.compile(r"^[A-z0-9]{64}$")
     if not p.match(api_key):
-        raise TypeError('Binance API key is invalid')
+        raise TypeError("Binance API key is invalid")
     app.api_key = api_key
 
     # validates the api secret is syntactically correct
     api_secret = keyring.get_password("pycryptobot", api_key)
     p = re.compile(r"^[A-z0-9]{64}$")
     if not p.match(api_secret):
-        raise TypeError('Binance API secret is invalid')
+        raise TypeError("Binance API secret is invalid")
     app.api_secret = api_secret
 
     valid_urls = [
-        'https://api.binance.com/',
-        'https://testnet.binance.vision/api/',
-        'https://api.binance.com',
-        'https://testnet.binance.vision/api',
-        'https://api.binance.us',
+        "https://api.binance.com/",
+        "https://testnet.binance.vision/api/",
+        "https://api.binance.com",
+        "https://testnet.binance.vision/api",
+        "https://api.binance.us",
     ]
 
     # validate Binance API
-    if binance_config['api_url'] not in valid_urls:
-        raise ValueError('Binance API URL is invalid')
+    if binance_config["api_url"] not in valid_urls:
+        raise ValueError("Binance API URL is invalid")
 
-    app.api_url = binance_config['api_url']
-    app.base_currency = 'BTC'
-    app.quote_currency = 'GBP'
+    app.api_url = binance_config["api_url"]
+    app.base_currency = "BTC"
+    app.quote_currency = "GBP"
 
     config = merge_config_and_args(binance_config, args)
 
     defaultConfigParse(app, config)
 
-    if 'base_currency' in config and config['base_currency'] is not None:
-        if not isCurrencyValid(config['base_currency']):
-            raise TypeError('Base currency is invalid.')
-        app.base_currency = config['base_currency']
+    if "base_currency" in config and config["base_currency"] is not None:
+        if not isCurrencyValid(config["base_currency"]):
+            raise TypeError("Base currency is invalid.")
+        app.base_currency = config["base_currency"]
 
-    if 'quote_currency' in config and config['quote_currency'] is not None:
-        if not isCurrencyValid(config['quote_currency']):
-            raise TypeError('Quote currency is invalid.')
-        app.quote_currency = config['quote_currency']
+    if "quote_currency" in config and config["quote_currency"] is not None:
+        if not isCurrencyValid(config["quote_currency"]):
+            raise TypeError("Quote currency is invalid.")
+        app.quote_currency = config["quote_currency"]
 
-    if 'market' in config and config['market'] is not None:
+    if "market" in config and config["market"] is not None:
         app.market, app.base_currency, app.quote_currency = parseMarket(
-            config['market'])
+            config["market"]
+        )
 
-    if app.base_currency != '' and app.quote_currency != '':
+    if app.base_currency != "" and app.quote_currency != "":
         app.market = app.base_currency + app.quote_currency
 
     if (
-        'granularity' in config
-        and config['granularity'] is not None
-        and isinstance(config['granularity'], str)
-        and config['granularity'] in ['1m', '5m', '15m', '1h', '6h', '1d']
+        "granularity" in config
+        and config["granularity"] is not None
+        and isinstance(config["granularity"], str)
+        and config["granularity"] in ["1m", "5m", "15m", "1h", "6h", "1d"]
     ):
-        app.granularity = to_internal_granularity(config['granularity'])
+        app.granularity = to_internal_granularity(config["granularity"])
         app.smart_switch = 0
